@@ -301,7 +301,11 @@ export class GameScene extends Phaser.Scene {
     // 检查敌人是否有 takeDamage 方法
     if (enemy.takeDamage) {
       console.log('调用 enemy.takeDamage');
-      const killed = enemy.takeDamage(bullet.damage || 1);
+
+      // 计算连击伤害
+      const finalDamage = this.player.onHitTarget(enemy);
+
+      const killed = enemy.takeDamage(finalDamage);
       console.log('takeDamage 返回值（是否击杀）:', killed);
 
       // 吸血效果
@@ -328,7 +332,9 @@ export class GameScene extends Phaser.Scene {
       if (bullet.body) bullet.disableBody();
     }
 
-    boss.takeDamage(bullet.damage || 1);
+    // 计算连击伤害
+    const finalDamage = this.player.onHitTarget(boss);
+    boss.takeDamage(finalDamage);
   }
 
   /**
@@ -478,10 +484,8 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    // 更新敌人生成器
-    if (!this.bossManager.isInBossPhase()) {
-      this.enemySpawner.update(time, delta);
-    }
+    // 更新敌人生成器（BOSS期间也继续生成小兵）
+    this.enemySpawner.update(time, delta);
 
     // 更新BOSS管理器
     this.bossManager.update(time, delta);

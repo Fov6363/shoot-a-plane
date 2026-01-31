@@ -10,7 +10,7 @@ export const GAME_CONFIG: GameConfig = {
   // 玩家配置
   PLAYER: {
     INITIAL_HP: 3,
-    INITIAL_SPEED: 200,
+    INITIAL_SPEED: 300, // 提高移动速度
     FIRE_RATE: 300, // ms
     BULLET_SPEED: 400,
     BULLET_DAMAGE: 1,

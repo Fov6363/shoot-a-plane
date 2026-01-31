@@ -37,6 +37,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // 特殊效果标志
     this.hasMagnet = false;
     this.hasLifesteal = false;
+
+    // 连击增伤系统
+    this.comboDamageLevel = 0;
+    this.comboDamageBonus = 0; // 每次连击的伤害加成
+    this.currentCombo = 0; // 当前连击数
+    this.lastHitTarget = null; // 上次击中的目标
+    this.comboResetTimer = 0; // 连击重置计时器
   }
 
   /**
@@ -159,5 +166,46 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.setAlpha(1);
       }
     }
+
+    // 连击重置计时（2秒未击中则重置）
+    if (this.currentCombo > 0) {
+      this.comboResetTimer += delta;
+      if (this.comboResetTimer > 2000) {
+        this.resetCombo();
+      }
+    }
+  }
+
+  /**
+   * 记录击中目标（用于连击系统）
+   */
+  onHitTarget(target) {
+    if (!this.comboDamageLevel) return this.damage;
+
+    // 检查是否是同一目标
+    if (this.lastHitTarget === target) {
+      this.currentCombo++;
+    } else {
+      this.currentCombo = 1;
+      this.lastHitTarget = target;
+    }
+
+    // 重置计时器
+    this.comboResetTimer = 0;
+
+    // 计算连击伤害
+    const comboBonus = this.currentCombo * this.comboDamageBonus;
+    const finalDamage = this.damage * (1 + comboBonus);
+
+    return finalDamage;
+  }
+
+  /**
+   * 重置连击
+   */
+  resetCombo() {
+    this.currentCombo = 0;
+    this.lastHitTarget = null;
+    this.comboResetTimer = 0;
   }
 }

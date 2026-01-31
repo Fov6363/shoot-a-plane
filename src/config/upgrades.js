@@ -23,6 +23,7 @@ export const UPGRADE_TYPES = {
   LIFESTEAL: 'lifesteal',
   PIERCE: 'pierce',
   CRITICAL: 'critical',
+  COMBO_DAMAGE: 'combo-damage',
 };
 
 export const UPGRADES = {
@@ -155,17 +156,18 @@ export const UPGRADES = {
     }
   },
 
-  [UPGRADE_TYPES.SIDE_GUNS]: {
-    id: UPGRADE_TYPES.SIDE_GUNS,
-    name: '侧翼炮',
-    description: '飞机两侧额外武器',
-    type: 'weapon',
-    repeatable: true,
-    maxLevel: 2,
-    apply: (player, level) => {
-      player.weaponSideGuns = level;
-    }
-  },
+  // 侧翼炮已废弃（作用不大）
+  // [UPGRADE_TYPES.SIDE_GUNS]: {
+  //   id: UPGRADE_TYPES.SIDE_GUNS,
+  //   name: '侧翼炮',
+  //   description: '飞机两侧额外武器',
+  //   type: 'weapon',
+  //   repeatable: true,
+  //   maxLevel: 2,
+  //   apply: (player, level) => {
+  //     player.weaponSideGuns = level;
+  //   }
+  // },
 
   // ===== 特殊技能升级（限1次） =====
   [UPGRADE_TYPES.SHIELD]: {
@@ -238,6 +240,19 @@ export const UPGRADES = {
     maxLevel: 1,
     apply: (player, level) => {
       player.hasCritical = true;
+    }
+  },
+
+  [UPGRADE_TYPES.COMBO_DAMAGE]: {
+    id: UPGRADE_TYPES.COMBO_DAMAGE,
+    name: '连击增伤',
+    description: '连续击中同一目标，每次伤害+1%（可叠加）',
+    type: 'skill',
+    repeatable: true,
+    maxLevel: 10,
+    apply: (player, level) => {
+      player.comboDamageLevel = level;
+      player.comboDamageBonus = 0.01 * level; // 每级+1%
     }
   },
 };

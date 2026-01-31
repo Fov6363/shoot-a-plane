@@ -45,8 +45,8 @@ export class BossManager {
     this.inBossPhase = true;
     this.stageTimer = 0;
 
-    // 清除所有小怪
-    this.scene.events.emit('clear-all-enemies');
+    // 不再清除小怪，BOSS期间也保留小兵
+    // this.scene.events.emit('clear-all-enemies');
 
     // 显示BOSS警告
     this.showBossWarning();
