@@ -4,7 +4,7 @@ import { GAME_CONFIG } from '../config/gameConfig.ts';
 import { Enemy, ShooterEnemy, TrackerEnemy } from '../entities/Enemy.js';
 
 export class EnemySpawner {
-  constructor(scene) {
+  constructor(scene, enemyGroup) {
     this.scene = scene;
 
     // 生成参数
@@ -16,8 +16,9 @@ export class EnemySpawner {
     this.stage = 1;
     this.difficultyMultiplier = 1.0;
 
-    // 敌人组（使用物理组以支持碰撞检测）
-    this.enemies = scene.physics.add.group();
+    // 敌人组（从外部传入，确保碰撞检测正确）
+    this.enemies = enemyGroup;
+    console.log('EnemySpawner 接收到敌人组:', this.enemies);
 
     // 已激活的敌人类型
     this.activeEnemyTypes = ['BASIC', 'SHOOTER'];
@@ -88,6 +89,26 @@ export class EnemySpawner {
     enemy.setVelocityY(enemy.baseSpeed);
 
     this.enemies.add(enemy);
+
+    // 重要：添加到组后必须重新设置速度，因为组会重置速度为0
+    enemy.setVelocityY(enemy.baseSpeed);
+
+    console.log('修复后的速度:', enemy.body.velocity.y);
+
+    console.log('生成敌人:', {
+      type: type,
+      position: { x: enemy.x, y: enemy.y },
+      hp: enemy.hp,
+      visible: enemy.visible,
+      active: enemy.active,
+      texture: enemy.texture.key,
+      displayWidth: enemy.displayWidth,
+      displayHeight: enemy.displayHeight,
+      hasBody: !!enemy.body,
+      bodyEnabled: enemy.body ? enemy.body.enable : 'no body',
+      velocity: enemy.body ? { x: enemy.body.velocity.x, y: enemy.body.velocity.y } : 'no body',
+      baseSpeed: enemy.baseSpeed
+    });
   }
 
   /**

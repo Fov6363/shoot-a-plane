@@ -38,10 +38,14 @@ export class GameScene extends Phaser.Scene {
     // 创建经验球组
     this.xpOrbs = this.add.group();
 
+    // 创建敌人组（必须在这里创建，以便正确设置碰撞检测）
+    this.enemies = this.physics.add.group();
+    console.log('敌人组已创建:', this.enemies);
+
     // 创建系统
     this.experienceSystem = new ExperienceSystem(this);
     this.upgradeSystem = new UpgradeSystem(this);
-    this.enemySpawner = new EnemySpawner(this);
+    this.enemySpawner = new EnemySpawner(this, this.enemies);
     this.bossManager = new BossManager(this);
 
     // 游戏状态
@@ -65,14 +69,17 @@ export class GameScene extends Phaser.Scene {
    * 设置碰撞检测
    */
   setupCollisions() {
+    console.log('设置碰撞检测，敌人组:', this.enemies);
+
     // 玩家子弹 vs 敌人
     this.physics.add.overlap(
       this.playerBullets,
-      this.enemySpawner.getEnemies(),
+      this.enemies,
       this.onBulletHitEnemy,
       null,
       this
     );
+    console.log('已设置：玩家子弹 vs 敌人');
 
     // 玩家子弹 vs BOSS
     this.physics.add.overlap(
@@ -99,11 +106,12 @@ export class GameScene extends Phaser.Scene {
     // 敌人 vs 玩家
     this.physics.add.overlap(
       this.player,
-      this.enemySpawner.getEnemies(),
+      this.enemies,
       this.onEnemyHitPlayer,
       null,
       this
     );
+    console.log('已设置：敌人 vs 玩家');
 
     // BOSS vs 玩家
     this.physics.add.overlap(
@@ -295,7 +303,10 @@ export class GameScene extends Phaser.Scene {
    * 子弹击中敌人
    */
   onBulletHitEnemy(bullet, enemy) {
-    console.log('子弹击中敌人！', 'bullet.active:', bullet.active, 'enemy.active:', enemy.active);
+    console.log('子弹击中敌人！', 'bullet:', bullet, 'enemy:', enemy);
+    console.log('enemy 类型:', enemy.constructor.name);
+    console.log('enemy 是否有 takeDamage:', typeof enemy.takeDamage);
+    console.log('enemy 的所有属性:', Object.keys(enemy));
 
     if (!bullet.active || !enemy.active) {
       console.log('子弹或敌人已失活，跳过');
@@ -368,6 +379,7 @@ export class GameScene extends Phaser.Scene {
    * 敌人撞击玩家
    */
   onEnemyHitPlayer(player, enemy) {
+    console.log('敌人撞击玩家！enemy.active:', enemy.active);
     if (!enemy.active) return;
 
     player.takeDamage(1);
@@ -452,6 +464,17 @@ export class GameScene extends Phaser.Scene {
    */
   update(time, delta) {
     if (this.gameOver) return;
+
+    // 每秒输出一次敌人信息
+    if (!this.lastEnemyLog || time - this.lastEnemyLog > 1000) {
+      this.lastEnemyLog = time;
+      const enemyCount = this.enemies.getChildren().length;
+      console.log('当前敌人数量:', enemyCount);
+      if (enemyCount > 0) {
+        const firstEnemy = this.enemies.getChildren()[0];
+        console.log('第一个敌人位置:', { x: firstEnemy.x, y: firstEnemy.y, active: firstEnemy.active, visible: firstEnemy.visible });
+      }
+    }
 
     // 更新玩家
     this.player.update(time, delta);
