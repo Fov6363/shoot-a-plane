@@ -4,8 +4,9 @@ import { GAME_CONFIG } from '../config/gameConfig.ts';
 import { Boss } from '../entities/Boss.js';
 
 export class BossManager {
-  constructor(scene) {
+  constructor(scene, bossGroup) {
     this.scene = scene;
+    this.bossGroup = bossGroup;
 
     this.currentBoss = null;
     this.stage = 0;
@@ -54,6 +55,11 @@ export class BossManager {
     this.scene.time.delayedCall(2000, () => {
       const { width } = this.scene.cameras.main;
       this.currentBoss = new Boss(this.scene, width / 2, -50, this.stage);
+
+      // 将BOSS添加到组中
+      if (this.bossGroup) {
+        this.bossGroup.add(this.currentBoss);
+      }
 
       // 触发BOSS出现事件
       this.scene.events.emit('boss-spawned', {

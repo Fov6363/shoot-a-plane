@@ -38,11 +38,15 @@ export class GameScene extends Phaser.Scene {
     this.enemies = this.physics.add.group();
     console.log('敌人组已创建:', this.enemies);
 
+    // 创建BOSS组
+    this.bosses = this.physics.add.group();
+    console.log('BOSS组已创建:', this.bosses);
+
     // 创建系统
     this.experienceSystem = new ExperienceSystem(this);
     this.upgradeSystem = new UpgradeSystem(this);
     this.enemySpawner = new EnemySpawner(this, this.enemies);
-    this.bossManager = new BossManager(this);
+    this.bossManager = new BossManager(this, this.bosses);
 
     // 游戏状态
     this.score = 0;
@@ -80,12 +84,8 @@ export class GameScene extends Phaser.Scene {
     // 玩家子弹 vs BOSS
     this.physics.add.overlap(
       this.playerBullets,
-      null,
-      (bullet, boss) => {
-        if (boss && boss === this.bossManager.getCurrentBoss()) {
-          this.onBulletHitBoss(bullet, boss);
-        }
-      },
+      this.bosses,
+      this.onBulletHitBoss,
       null,
       this
     );
@@ -112,12 +112,8 @@ export class GameScene extends Phaser.Scene {
     // BOSS vs 玩家
     this.physics.add.overlap(
       this.player,
-      null,
-      (player, boss) => {
-        if (boss && boss === this.bossManager.getCurrentBoss()) {
-          this.onEnemyHitPlayer(player, boss);
-        }
-      },
+      this.bosses,
+      this.onEnemyHitPlayer,
       null,
       this
     );
@@ -397,9 +393,11 @@ export class GameScene extends Phaser.Scene {
     this.score += data.score;
     console.log('更新后总分:', this.score);
 
-    // 生成经验球
-    const orb = new ExperienceOrb(this, data.x, data.y, data.xp);
-    this.xpOrbs.add(orb);
+    // 30% 概率掉落经验球
+    if (Math.random() < 0.3) {
+      const orb = new ExperienceOrb(this, data.x, data.y, data.xp);
+      this.xpOrbs.add(orb);
+    }
   }
 
   /**
@@ -408,12 +406,14 @@ export class GameScene extends Phaser.Scene {
   onBossKilled(data) {
     this.score += data.score;
 
-    // 生成大量经验球
+    // 生成大量经验球（75%概率每个）
     for (let i = 0; i < 10; i++) {
-      const offsetX = Phaser.Math.Between(-50, 50);
-      const offsetY = Phaser.Math.Between(-50, 50);
-      const orb = new ExperienceOrb(this, data.x + offsetX, data.y + offsetY, data.xp / 10);
-      this.xpOrbs.add(orb);
+      if (Math.random() < 0.75) {
+        const offsetX = Phaser.Math.Between(-50, 50);
+        const offsetY = Phaser.Math.Between(-50, 50);
+        const orb = new ExperienceOrb(this, data.x + offsetX, data.y + offsetY, data.xp / 10);
+        this.xpOrbs.add(orb);
+      }
     }
   }
 
@@ -487,13 +487,30 @@ export class GameScene extends Phaser.Scene {
 
     // 玩家自动射击
     if (this.player.shoot(time)) {
-      const bullet = this.playerBullets.fireBullet(
-        this.player.x,
-        this.player.y - 45,
-        -this.player.bulletSpeed,
-        this.player.damage
-      );
-      console.log('发射子弹！子弹对象:', bullet, '伤害:', this.player.damage);
+      // 检查是否有双重射击
+      if (this.player.weaponDualShot && this.player.weaponDualShot > 0) {
+        // 双重射击 - 左右各一颗
+        this.playerBullets.fireBullet(
+          this.player.x - 15,
+          this.player.y - 45,
+          -this.player.bulletSpeed,
+          this.player.damage
+        );
+        this.playerBullets.fireBullet(
+          this.player.x + 15,
+          this.player.y - 45,
+          -this.player.bulletSpeed,
+          this.player.damage
+        );
+      } else {
+        // 普通射击 - 单发
+        this.playerBullets.fireBullet(
+          this.player.x,
+          this.player.y - 45,
+          -this.player.bulletSpeed,
+          this.player.damage
+        );
+      }
     }
 
     // 更新敌人生成器
