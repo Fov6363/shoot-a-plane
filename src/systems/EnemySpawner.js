@@ -9,7 +9,7 @@ export class EnemySpawner {
 
     // 生成参数
     this.spawnTimer = 0;
-    this.baseSpawnInterval = 1200; // 基础生成间隔（ms）- 提高出现频率
+    this.baseSpawnInterval = 400; // 基础生成间隔（ms）- 3倍频率
     this.currentSpawnInterval = this.baseSpawnInterval;
 
     // 难度参数
@@ -63,12 +63,12 @@ export class EnemySpawner {
     // 难度倍率：每30秒增加10%
     this.difficultyMultiplier = 1 + difficultyLevel * 0.1;
 
-    // 生成速度：每30秒减少10%间隔（最多减少60%）
-    const spawnSpeedUp = Math.min(difficultyLevel * 0.1, 0.6);
+    // 生成速度：每30秒减少10%间隔（最多减少50%）
+    const spawnSpeedUp = Math.min(difficultyLevel * 0.1, 0.5);
     this.currentSpawnInterval = this.baseSpawnInterval * (1 - spawnSpeedUp);
 
-    // 确保最小间隔不低于400ms
-    this.currentSpawnInterval = Math.max(this.currentSpawnInterval, 400);
+    // 确保最小间隔不低于200ms
+    this.currentSpawnInterval = Math.max(this.currentSpawnInterval, 200);
   }
 
   /**

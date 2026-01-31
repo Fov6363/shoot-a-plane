@@ -120,29 +120,31 @@ export const UPGRADES = {
     }
   },
 
-  [UPGRADE_TYPES.SPREAD_SHOT]: {
-    id: UPGRADE_TYPES.SPREAD_SHOT,
-    name: '散弹枪',
-    description: '发射扇形散弹',
-    type: 'weapon',
-    repeatable: true,
-    maxLevel: 3,
-    apply: (player, level) => {
-      player.weaponSpreadShot = level;
-    }
-  },
+  // 散弹枪已废弃
+  // [UPGRADE_TYPES.SPREAD_SHOT]: {
+  //   id: UPGRADE_TYPES.SPREAD_SHOT,
+  //   name: '散弹枪',
+  //   description: '发射扇形散弹',
+  //   type: 'weapon',
+  //   repeatable: true,
+  //   maxLevel: 3,
+  //   apply: (player, level) => {
+  //     player.weaponSpreadShot = level;
+  //   }
+  // },
 
-  [UPGRADE_TYPES.LASER]: {
-    id: UPGRADE_TYPES.LASER,
-    name: '激光',
-    description: '发射持续激光束',
-    type: 'weapon',
-    repeatable: true,
-    maxLevel: 3,
-    apply: (player, level) => {
-      player.weaponLaser = level;
-    }
-  },
+  // 激光已废弃
+  // [UPGRADE_TYPES.LASER]: {
+  //   id: UPGRADE_TYPES.LASER,
+  //   name: '激光',
+  //   description: '发射持续激光束',
+  //   type: 'weapon',
+  //   repeatable: true,
+  //   maxLevel: 3,
+  //   apply: (player, level) => {
+  //     player.weaponLaser = level;
+  //   }
+  // },
 
   [UPGRADE_TYPES.HOMING_MISSILE]: {
     id: UPGRADE_TYPES.HOMING_MISSILE,

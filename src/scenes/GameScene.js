@@ -59,6 +59,11 @@ export class GameScene extends Phaser.Scene {
     // 创建UI
     this.createUI();
     console.log('=== GameScene.create() 完成 ===');
+
+    // 开局送一次技能选择（延迟1秒触发）
+    this.time.delayedCall(1000, () => {
+      this.events.emit('level-up', 1);
+    });
   }
 
   /**
