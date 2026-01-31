@@ -7,6 +7,9 @@ export class ExperienceOrb extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    // 经验球基础大小
+    this.setScale(0.3);
+
     this.xpValue = xpValue;
     this.setVelocity(
       Phaser.Math.Between(-50, 50),
@@ -16,10 +19,10 @@ export class ExperienceOrb extends Phaser.Physics.Arcade.Sprite {
     // 阻力，让它慢慢停下
     this.setDrag(100);
 
-    // 脉冲动画
+    // 脉冲动画（在基础缩放上）
     scene.tweens.add({
       targets: this,
-      scale: 1.2,
+      scale: 0.36, // 0.3 * 1.2
       duration: 500,
       yoyo: true,
       repeat: -1

@@ -9,6 +9,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    // 缩放到合适大小
+    this.setScale(0.5);
+
     // 物理属性
     this.setCollideWorldBounds(true);
     this.setDrag(400);

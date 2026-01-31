@@ -7,6 +7,9 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    // 子弹缩小一些
+    this.setScale(0.4);
+
     this.damage = 1;
     this.setActive(false);
     this.setVisible(false);

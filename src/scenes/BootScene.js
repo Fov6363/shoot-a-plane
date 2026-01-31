@@ -11,13 +11,13 @@ export class BootScene extends Phaser.Scene {
 
     // 加载 Kenney 太空射击素材
     // 玩家飞机
-    this.load.image('player', 'assets/sprites/playerShip1_green.png');
+    this.load.image('player', 'assets/sprites/PNG/playerShip1_green.png');
 
     // 敌人飞机
     this.load.image('enemy', 'assets/sprites/PNG/Enemies/enemyRed1.png');
 
     // BOSS（使用大型敌机）
-    this.load.image('boss', 'assets/sprites/ufoRed.png');
+    this.load.image('boss', 'assets/sprites/PNG/ufoRed.png');
 
     // 子弹
     this.load.image('bullet', 'assets/sprites/PNG/Lasers/laserBlue01.png');

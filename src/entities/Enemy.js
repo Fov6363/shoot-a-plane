@@ -9,6 +9,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    // 缩放到合适大小
+    this.setScale(0.5);
+
     const config = GAME_CONFIG.ENEMY_TYPES[type];
 
     this.enemyType = type;

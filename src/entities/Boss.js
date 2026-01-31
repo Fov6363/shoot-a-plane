@@ -9,6 +9,9 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    // BOSS 稍大一些
+    this.setScale(0.8);
+
     this.stage = stage;
 
     // BOSS属性
