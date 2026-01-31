@@ -110,11 +110,11 @@ export const UPGRADES = {
   // ===== 武器类升级（初次获得，可多次强化） =====
   [UPGRADE_TYPES.DUAL_SHOT]: {
     id: UPGRADE_TYPES.DUAL_SHOT,
-    name: '双重射击',
-    description: '同时发射2颗子弹',
+    name: '多重射击',
+    description: '每级增加1颗子弹，最终形成扇形弹幕',
     type: 'weapon',
     repeatable: true,
-    maxLevel: 3,
+    maxLevel: 10,
     apply: (player, level) => {
       player.weaponDualShot = level;
     }
@@ -146,17 +146,18 @@ export const UPGRADES = {
   //   }
   // },
 
-  [UPGRADE_TYPES.HOMING_MISSILE]: {
-    id: UPGRADE_TYPES.HOMING_MISSILE,
-    name: '追踪导弹',
-    description: '发射自动追踪敌人的导弹',
-    type: 'weapon',
-    repeatable: true,
-    maxLevel: 3,
-    apply: (player, level) => {
-      player.weaponHomingMissile = level;
-    }
-  },
+  // 追踪导弹已废弃
+  // [UPGRADE_TYPES.HOMING_MISSILE]: {
+  //   id: UPGRADE_TYPES.HOMING_MISSILE,
+  //   name: '追踪导弹',
+  //   description: '发射自动追踪敌人的导弹',
+  //   type: 'weapon',
+  //   repeatable: true,
+  //   maxLevel: 3,
+  //   apply: (player, level) => {
+  //     player.weaponHomingMissile = level;
+  //   }
+  // },
 
   // 侧翼炮已废弃（作用不大）
   // [UPGRADE_TYPES.SIDE_GUNS]: {

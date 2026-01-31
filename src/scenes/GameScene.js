@@ -463,21 +463,34 @@ export class GameScene extends Phaser.Scene {
 
     // 玩家自动射击
     if (this.player.shoot(time)) {
-      // 检查是否有双重射击
+      // 检查是否有多重射击
       if (this.player.weaponDualShot && this.player.weaponDualShot > 0) {
-        // 双重射击 - 左右各一颗
-        this.playerBullets.fireBullet(
-          this.player.x - 15,
-          this.player.y - 45,
-          -this.player.bulletSpeed,
-          this.player.damage
-        );
-        this.playerBullets.fireBullet(
-          this.player.x + 15,
-          this.player.y - 45,
-          -this.player.bulletSpeed,
-          this.player.damage
-        );
+        // 多重射击 - 根据等级发射多颗子弹
+        const bulletCount = this.player.weaponDualShot + 1; // 1级=2颗，10级=11颗
+        const spreadAngle = 60; // 总扇形角度（度）
+        const angleStep = bulletCount > 1 ? spreadAngle / (bulletCount - 1) : 0;
+        const startAngle = -spreadAngle / 2; // 从-30度开始
+
+        for (let i = 0; i < bulletCount; i++) {
+          const angle = startAngle + angleStep * i;
+          const angleRad = Phaser.Math.DegToRad(angle);
+
+          // 计算子弹速度向量
+          const velocityX = Math.sin(angleRad) * this.player.bulletSpeed;
+          const velocityY = -Math.cos(angleRad) * this.player.bulletSpeed;
+
+          const bullet = this.playerBullets.fireBullet(
+            this.player.x,
+            this.player.y - 45,
+            velocityY,
+            this.player.damage
+          );
+
+          // 设置横向速度
+          if (bullet && bullet.body) {
+            bullet.body.velocity.x = velocityX;
+          }
+        }
       } else {
         // 普通射击 - 单发
         this.playerBullets.fireBullet(
