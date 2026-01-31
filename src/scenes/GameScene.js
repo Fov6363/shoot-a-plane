@@ -465,11 +465,15 @@ export class GameScene extends Phaser.Scene {
     if (this.player.shoot(time)) {
       // 检查是否有多重射击
       if (this.player.weaponDualShot && this.player.weaponDualShot > 0) {
-        // 多重射击 - 根据等级发射多颗子弹
+        // 多重射击 - 根据等级发射多颗子弹（从中间逐渐展开）
         const bulletCount = this.player.weaponDualShot + 1; // 1级=2颗，10级=11颗
-        const spreadAngle = 60; // 总扇形角度（度）
+
+        // 扇形角度随等级递增：1级很小，10级达到60度
+        const maxSpreadAngle = 60; // 最大扇形角度
+        const spreadAngle = (bulletCount - 1) * (maxSpreadAngle / 10); // 渐进式展开
+
         const angleStep = bulletCount > 1 ? spreadAngle / (bulletCount - 1) : 0;
-        const startAngle = -spreadAngle / 2; // 从-30度开始
+        const startAngle = -spreadAngle / 2; // 居中展开
 
         for (let i = 0; i < bulletCount; i++) {
           const angle = startAngle + angleStep * i;

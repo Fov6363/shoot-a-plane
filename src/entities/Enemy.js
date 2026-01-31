@@ -125,6 +125,9 @@ export class ShooterEnemy extends Enemy {
   }
 
   shoot() {
+    // 安全检查：确保 scene 存在且敌人未被销毁
+    if (!this.scene || !this.active) return;
+
     this.scene.events.emit('enemy-shoot', {
       x: this.x,
       y: this.y + 15,

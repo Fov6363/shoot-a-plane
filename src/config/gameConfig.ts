@@ -22,7 +22,7 @@ export const GAME_CONFIG: GameConfig = {
     SMALL_ENEMY_XP: 10,
     MEDIUM_ENEMY_XP: 25,
     LARGE_ENEMY_XP: 50,
-    BOSS_XP: 200,
+    BOSS_XP: 60, // 降低70%
   },
 
   // BOSS配置
@@ -41,11 +41,11 @@ export const GAME_CONFIG: GameConfig = {
 
   // 敌人类型
   ENEMY_TYPES: {
-    BASIC: { hp: 1, score: 10, xp: 10, speed: 100 },
-    SHOOTER: { hp: 2, score: 20, xp: 15, speed: 80 },
-    TRACKER: { hp: 3, score: 30, xp: 25, speed: 60 },
-    HEAVY: { hp: 5, score: 50, xp: 40, speed: 50 },
-    FAST: { hp: 2, score: 40, xp: 30, speed: 200 },
+    BASIC: { hp: 1, score: 10, xp: 3, speed: 100 },      // 降低70%
+    SHOOTER: { hp: 2, score: 20, xp: 5, speed: 80 },     // 降低67%
+    TRACKER: { hp: 3, score: 30, xp: 8, speed: 60 },     // 降低68%
+    HEAVY: { hp: 5, score: 50, xp: 12, speed: 50 },      // 降低70%
+    FAST: { hp: 2, score: 40, xp: 10, speed: 200 },      // 降低67%
   },
 
   // 物理配置
