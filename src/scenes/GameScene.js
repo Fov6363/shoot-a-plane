@@ -9,7 +9,6 @@ import { UpgradeSystem } from '../systems/UpgradeSystem.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { BossManager } from '../systems/BossManager.js';
 import { GAME_CONFIG } from '../config/gameConfig.ts';
-import { AssetGenerator } from '../utils/assetGenerator.js';
 import { StorageManager } from '../utils/storage.js';
 
 export class GameScene extends Phaser.Scene {
@@ -19,9 +18,6 @@ export class GameScene extends Phaser.Scene {
 
   create() {
     console.log('=== GameScene.create() 开始执行 ===');
-
-    // 生成玩家精灵
-    AssetGenerator.createPlayerSprite(this, 0, 0);
 
     // 创建玩家
     const { width, height } = this.cameras.main;
