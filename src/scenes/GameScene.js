@@ -2,7 +2,6 @@
 
 import { Player } from '../entities/Player.js';
 import { BulletGroup } from '../entities/Bullet.js';
-import { ExperienceOrb } from '../entities/ExperienceOrb.js';
 import { InputManager } from '../systems/InputManager.js';
 import { ExperienceSystem } from '../systems/ExperienceSystem.js';
 import { UpgradeSystem } from '../systems/UpgradeSystem.js';
@@ -30,9 +29,6 @@ export class GameScene extends Phaser.Scene {
     // 创建子弹组
     this.playerBullets = new BulletGroup(this, 'bullet', 50);
     this.enemyBullets = new BulletGroup(this, 'enemy-bullet', 100);
-
-    // 创建经验球组
-    this.xpOrbs = this.add.group();
 
     // 创建敌人组（必须在这里创建，以便正确设置碰撞检测）
     this.enemies = this.physics.add.group();
@@ -118,14 +114,7 @@ export class GameScene extends Phaser.Scene {
       this
     );
 
-    // 玩家 vs 经验球
-    this.physics.add.overlap(
-      this.player,
-      this.xpOrbs,
-      this.onPlayerCollectXP,
-      null,
-      this
-    );
+    // 经验球已移除，不再需要碰撞检测
   }
 
   /**
@@ -151,13 +140,6 @@ export class GameScene extends Phaser.Scene {
 
     // 玩家死亡
     this.events.on('player-died', this.onPlayerDied, this);
-
-    // 磁铁效果
-    this.events.on('upgrade-applied', (data) => {
-      if (data.upgradeId === 'magnet') {
-        this.player.hasMagnet = true;
-      }
-    });
   }
 
   /**
@@ -379,13 +361,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * 玩家收集经验球
-   */
-  onPlayerCollectXP(player, orb) {
-    orb.collect();
-  }
-
-  /**
    * 敌人被击杀
    */
   onEnemyKilled(data) {
@@ -393,11 +368,8 @@ export class GameScene extends Phaser.Scene {
     this.score += data.score;
     console.log('更新后总分:', this.score);
 
-    // 30% 概率掉落经验球
-    if (Math.random() < 0.3) {
-      const orb = new ExperienceOrb(this, data.x, data.y, data.xp);
-      this.xpOrbs.add(orb);
-    }
+    // 直接获得经验（不再掉落经验球）
+    this.experienceSystem.addXP(data.xp);
   }
 
   /**
@@ -406,15 +378,8 @@ export class GameScene extends Phaser.Scene {
   onBossKilled(data) {
     this.score += data.score;
 
-    // 生成大量经验球（75%概率每个）
-    for (let i = 0; i < 10; i++) {
-      if (Math.random() < 0.75) {
-        const offsetX = Phaser.Math.Between(-50, 50);
-        const offsetY = Phaser.Math.Between(-50, 50);
-        const orb = new ExperienceOrb(this, data.x + offsetX, data.y + offsetY, data.xp / 10);
-        this.xpOrbs.add(orb);
-      }
-    }
+    // 直接获得经验（不再掉落经验球）
+    this.experienceSystem.addXP(data.xp);
   }
 
   /**
@@ -520,19 +485,6 @@ export class GameScene extends Phaser.Scene {
 
     // 更新BOSS管理器
     this.bossManager.update(time, delta);
-
-    // 磁铁效果
-    if (this.player.hasMagnet) {
-      this.xpOrbs.children.each(orb => {
-        const distance = Phaser.Math.Distance.Between(
-          this.player.x, this.player.y,
-          orb.x, orb.y
-        );
-        if (distance < 150) {
-          orb.attractTo(this.player, 300);
-        }
-      });
-    }
 
     // 更新UI
     this.updateUI();

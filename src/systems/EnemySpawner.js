@@ -9,12 +9,13 @@ export class EnemySpawner {
 
     // 生成参数
     this.spawnTimer = 0;
-    this.baseSpawnInterval = 2000; // 基础生成间隔（ms）
+    this.baseSpawnInterval = 1200; // 基础生成间隔（ms）- 提高出现频率
     this.currentSpawnInterval = this.baseSpawnInterval;
 
     // 难度参数
     this.stage = 1;
     this.difficultyMultiplier = 1.0;
+    this.gameTime = 0; // 游戏进行时间（秒）
 
     // 敌人组（从外部传入，确保碰撞检测正确）
     this.enemies = enemyGroup;
@@ -38,12 +39,36 @@ export class EnemySpawner {
       return;
     }
 
+    // 累计游戏时间
+    this.gameTime += delta / 1000;
+
+    // 随时间递增难度
+    this.updateDifficulty();
+
     this.spawnTimer += delta;
 
     if (this.spawnTimer >= this.currentSpawnInterval) {
       this.spawnEnemy();
       this.spawnTimer = 0;
     }
+  }
+
+  /**
+   * 随时间更新难度
+   */
+  updateDifficulty() {
+    // 每30秒增加一次难度
+    const difficultyLevel = Math.floor(this.gameTime / 30);
+
+    // 难度倍率：每30秒增加10%
+    this.difficultyMultiplier = 1 + difficultyLevel * 0.1;
+
+    // 生成速度：每30秒减少10%间隔（最多减少60%）
+    const spawnSpeedUp = Math.min(difficultyLevel * 0.1, 0.6);
+    this.currentSpawnInterval = this.baseSpawnInterval * (1 - spawnSpeedUp);
+
+    // 确保最小间隔不低于400ms
+    this.currentSpawnInterval = Math.max(this.currentSpawnInterval, 400);
   }
 
   /**
@@ -85,7 +110,9 @@ export class EnemySpawner {
     // 应用难度倍率
     enemy.maxHp = Math.floor(enemy.maxHp * this.difficultyMultiplier);
     enemy.hp = enemy.maxHp;
-    enemy.baseSpeed *= (1 + (this.stage - 1) * GAME_CONFIG.DIFFICULTY.BULLET_SPEED_INCREASE);
+
+    // 基础速度提升20%，然后随难度继续增加
+    enemy.baseSpeed *= 1.2 * (1 + Math.floor(this.gameTime / 30) * 0.05);
     enemy.setVelocityY(enemy.baseSpeed);
 
     this.enemies.add(enemy);

@@ -180,17 +180,18 @@ export const UPGRADES = {
     }
   },
 
-  [UPGRADE_TYPES.MAGNET]: {
-    id: UPGRADE_TYPES.MAGNET,
-    name: '磁铁',
-    description: '自动吸收附近经验值',
-    type: 'skill',
-    repeatable: false,
-    maxLevel: 1,
-    apply: (player, level) => {
-      player.hasMagnet = true;
-    }
-  },
+  // 磁铁升级已废弃（经验球机制已移除）
+  // [UPGRADE_TYPES.MAGNET]: {
+  //   id: UPGRADE_TYPES.MAGNET,
+  //   name: '磁铁',
+  //   description: '自动吸收附近经验值',
+  //   type: 'skill',
+  //   repeatable: false,
+  //   maxLevel: 1,
+  //   apply: (player, level) => {
+  //     player.hasMagnet = true;
+  //   }
+  // },
 
   [UPGRADE_TYPES.BULLET_TIME]: {
     id: UPGRADE_TYPES.BULLET_TIME,
