@@ -25,10 +25,11 @@ export class UpgradeSystem {
     // 获取3个随机升级选项
     const options = this.getUpgradeOptions(3);
 
-    // 启动升级选择场景
+    // 启动升级选择场景并置顶（UpgradeScene 注册顺序在 GameScene 之前，需要手动提升）
     this.scene.scene.launch('UpgradeScene', {
       options: options
     });
+    this.scene.scene.bringToTop('UpgradeScene');
   }
 
   /**

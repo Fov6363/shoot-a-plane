@@ -19,7 +19,8 @@ export class ExperienceSystem {
    * 计算下一级所需经验
    */
   calculateNextLevelXP() {
-    return GAME_CONFIG.EXPERIENCE.BASE_LEVEL_XP * this.level;
+    // 使用 sqrt 缩放，前期升级快，后期平缓增长
+    return Math.floor(GAME_CONFIG.EXPERIENCE.BASE_LEVEL_XP * Math.sqrt(this.level));
   }
 
   /**

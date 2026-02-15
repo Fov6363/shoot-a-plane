@@ -56,12 +56,18 @@ export class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // 操作说明
-    const controls = [
-      '操作说明:',
-      'WASD / 方向键 - 移动',
-      '空格 - 射击',
-      '鼠标移动 - 跟随控制'
-    ];
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const controls = isTouchDevice
+      ? [
+          '操作说明:',
+          '触屏拖动 - 移动 | 自动射击'
+        ]
+      : [
+          '操作说明:',
+          'WASD / 方向键 - 移动',
+          '空格 - 射击',
+          '鼠标移动 - 跟随控制'
+        ];
 
     controls.forEach((text, i) => {
       this.add.text(20, height - 100 + i * 20, text, {

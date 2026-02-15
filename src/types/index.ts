@@ -7,6 +7,7 @@ export interface GameConfig {
   EXPERIENCE: ExperienceConfig;
   BOSS: BossConfig;
   DIFFICULTY: DifficultyConfig;
+  GOLD: GoldConfig;
   ENEMY_TYPES: Record<string, EnemyTypeConfig>;
   PHYSICS: PhysicsConfig;
   COLORS: ColorConfig;
@@ -31,6 +32,7 @@ export interface ExperienceConfig {
 export interface BossConfig {
   STAGE_DURATION: number;
   BASE_HP: number;
+  HP_PER_STAGE: number;
   BASE_SCORE: number;
 }
 
@@ -45,6 +47,12 @@ export interface EnemyTypeConfig {
   score: number;
   xp: number;
   speed: number;
+  gold: number;
+}
+
+export interface GoldConfig {
+  BOSS_BASE_GOLD: number;
+  BOSS_GOLD_PER_STAGE: number;
 }
 
 export interface PhysicsConfig {
@@ -81,6 +89,7 @@ export interface EnemyKilledData {
   y: number;
   xp: number;
   score: number;
+  gold: number;
 }
 
 export interface BossKilledData extends EnemyKilledData {

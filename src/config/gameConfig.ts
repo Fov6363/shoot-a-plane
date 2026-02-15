@@ -10,25 +10,26 @@ export const GAME_CONFIG: GameConfig = {
   // 玩家配置
   PLAYER: {
     INITIAL_HP: 3,
-    INITIAL_SPEED: 300, // 提高移动速度
-    FIRE_RATE: 300, // ms
+    INITIAL_SPEED: 300,
+    FIRE_RATE: 250, // ms（略快于之前的 300）
     BULLET_SPEED: 400,
-    BULLET_DAMAGE: 1,
+    BULLET_DAMAGE: 2, // 初始 2 伤害（前期更爽快）
   },
 
   // 经验值配置
   EXPERIENCE: {
-    BASE_LEVEL_XP: 100, // 每级需要的基础经验
+    BASE_LEVEL_XP: 80, // 降低基础经验门槛
     SMALL_ENEMY_XP: 10,
     MEDIUM_ENEMY_XP: 25,
     LARGE_ENEMY_XP: 50,
-    BOSS_XP: 60, // 降低70%
+    BOSS_XP: 80, // BOSS 给更多经验
   },
 
   // BOSS配置
   BOSS: {
-    STAGE_DURATION: 120000, // 2分钟后出BOSS (ms)
-    BASE_HP: 500,
+    STAGE_DURATION: 30000, // 30 秒出 BOSS
+    BASE_HP: 150, // 降低基础血量（初始 DPS ~8，约 20 秒打完）
+    HP_PER_STAGE: 100, // 每阶段额外增加的 HP
     BASE_SCORE: 1000,
   },
 
@@ -39,13 +40,19 @@ export const GAME_CONFIG: GameConfig = {
     BULLET_SPEED_INCREASE: 0.05,
   },
 
+  // 金币配置
+  GOLD: {
+    BOSS_BASE_GOLD: 50,
+    BOSS_GOLD_PER_STAGE: 30,
+  },
+
   // 敌人类型
   ENEMY_TYPES: {
-    BASIC: { hp: 1, score: 10, xp: 3, speed: 100 },      // 降低70%
-    SHOOTER: { hp: 2, score: 20, xp: 5, speed: 80 },     // 降低67%
-    TRACKER: { hp: 3, score: 30, xp: 8, speed: 60 },     // 降低68%
-    HEAVY: { hp: 5, score: 50, xp: 12, speed: 50 },      // 降低70%
-    FAST: { hp: 2, score: 40, xp: 10, speed: 200 },      // 降低67%
+    BASIC: { hp: 1, score: 10, xp: 3, speed: 100, gold: 1 },
+    SHOOTER: { hp: 2, score: 20, xp: 5, speed: 80, gold: 2 },
+    TRACKER: { hp: 3, score: 30, xp: 8, speed: 60, gold: 3 },
+    HEAVY: { hp: 5, score: 50, xp: 12, speed: 50, gold: 5 },
+    FAST: { hp: 2, score: 40, xp: 10, speed: 200, gold: 3 },
   },
 
   // 物理配置

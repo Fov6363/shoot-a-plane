@@ -1,5 +1,7 @@
 // src/scenes/BootScene.js
 
+import { AssetGenerator } from '../utils/assetGenerator.js';
+
 export class BootScene extends Phaser.Scene {
   constructor() {
     super({ key: 'BootScene' });
@@ -8,30 +10,15 @@ export class BootScene extends Phaser.Scene {
   preload() {
     // 创建加载进度条
     this.createLoadingBar();
-
-    // 加载 Kenney 太空射击素材
-    // 玩家飞机
-    this.load.image('player', 'assets/sprites/PNG/playerShip1_green.png');
-
-    // 敌人飞机
-    this.load.image('enemy', 'assets/sprites/PNG/Enemies/enemyRed1.png');
-
-    // BOSS（使用大型敌机）
-    this.load.image('boss', 'assets/sprites/PNG/ufoRed.png');
-
-    // 子弹
-    this.load.image('bullet', 'assets/sprites/PNG/Lasers/laserBlue01.png');
-    this.load.image('enemy-bullet', 'assets/sprites/PNG/Lasers/laserRed01.png');
-
-    // 经验球（使用蓝色星星）
-    this.load.image('xp-orb', 'assets/sprites/PNG/Power-ups/powerupBlue_star.png');
-
-    // 粒子效果（使用小圆形）
-    this.load.image('particle', 'assets/sprites/PNG/Power-ups/pill_blue.png');
+    // 所有纹理由 AssetGenerator 生成，不再加载外部图片
   }
 
   create() {
-    // 资源加载完成，跳转到菜单
+    try {
+      AssetGenerator.generateAll(this);
+    } catch (e) {
+      console.error('资源生成失败:', e);
+    }
     this.scene.start('MenuScene');
   }
 

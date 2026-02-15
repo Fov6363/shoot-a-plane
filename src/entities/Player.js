@@ -44,6 +44,31 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.currentCombo = 0; // 当前连击数
     this.lastHitTarget = null; // 上次击中的目标
     this.comboResetTimer = 0; // 连击重置计时器
+
+    // === 商店系统属性 ===
+    // 消耗品
+    this.bombs = 0;
+    this.rerollTokens = 0;
+
+    // 被动
+    this.hasGoldMagnet = false;
+    this.luckyGoldLevel = 0;
+    this.armorPlateLevel = 0;
+    this.dodgeChance = 0;
+    this.hasRevengeAura = false;
+    this.hasChainLightning = false;
+    this.hasOrbitalDrone = false;
+
+    // 主动
+    this.hasOvercharge = false;
+    this.overchargeReady = true;
+    this.overchargeCD = 0;
+    this.overchargeActive = false;
+    this.originalFireRate = 0;
+
+    this.hasTimeAnchor = false;
+    this.timeAnchorReady = true;
+    this.timeAnchorCD = 0;
   }
 
   /**
@@ -80,6 +105,28 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    */
   takeDamage(amount = 1) {
     if (this.invincible) return false;
+
+    // 装甲板闪避
+    if (this.dodgeChance > 0 && Math.random() < this.dodgeChance) {
+      // 显示闪避文字
+      if (this.scene) {
+        const dodgeText = this.scene.add.text(this.x, this.y - 30, 'DODGE!', {
+          fontSize: '20px',
+          fill: '#44aaff',
+          fontStyle: 'bold',
+          stroke: '#000000',
+          strokeThickness: 2,
+        }).setOrigin(0.5);
+        this.scene.tweens.add({
+          targets: dodgeText,
+          y: dodgeText.y - 40,
+          alpha: 0,
+          duration: 600,
+          onComplete: () => dodgeText.destroy(),
+        });
+      }
+      return false;
+    }
 
     this.hp -= amount;
 

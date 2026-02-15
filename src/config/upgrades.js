@@ -31,26 +31,26 @@ export const UPGRADES = {
   [UPGRADE_TYPES.DAMAGE]: {
     id: UPGRADE_TYPES.DAMAGE,
     name: '攻击力提升',
-    description: '所有武器伤害 +10%',
+    description: '所有武器伤害 +15%',
     type: 'stat',
     repeatable: true,
-    maxLevel: 10,
-    value: 0.1, // +10%
+    maxLevel: 8,
+    value: 0.15, // +15%
     apply: (player, level) => {
-      player.damage *= 1.1;
+      player.damage *= 1.15;
     }
   },
 
   [UPGRADE_TYPES.FIRE_RATE]: {
     id: UPGRADE_TYPES.FIRE_RATE,
     name: '射速提升',
-    description: '射击冷却时间 -15%',
+    description: '射击冷却时间 -20%',
     type: 'stat',
     repeatable: true,
-    maxLevel: 8,
-    value: 0.15,
+    maxLevel: 6,
+    value: 0.2,
     apply: (player, level) => {
-      player.fireRate *= 0.85;
+      player.fireRate *= 0.8;
     }
   },
 
@@ -111,7 +111,7 @@ export const UPGRADES = {
   [UPGRADE_TYPES.DUAL_SHOT]: {
     id: UPGRADE_TYPES.DUAL_SHOT,
     name: '多重射击',
-    description: '每级增加1颗子弹，最终形成扇形弹幕',
+    description: '每级增加2颗子弹，最终形成扇形弹幕',
     type: 'weapon',
     repeatable: true,
     maxLevel: 10,

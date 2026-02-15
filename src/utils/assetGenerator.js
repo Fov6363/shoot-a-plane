@@ -5,10 +5,25 @@
  * 用于在没有美术资源时快速开发
  */
 export class AssetGenerator {
+  static safeColorAdd(color, offset) {
+    const r = Math.min(0xff, ((color >> 16) & 0xff) + ((offset >> 16) & 0xff));
+    const g = Math.min(0xff, ((color >> 8) & 0xff) + ((offset >> 8) & 0xff));
+    const b = Math.min(0xff, (color & 0xff) + (offset & 0xff));
+    return (r << 16) | (g << 8) | b;
+  }
+
+  static safeColorSub(color, offset) {
+    const r = Math.max(0, ((color >> 16) & 0xff) - ((offset >> 16) & 0xff));
+    const g = Math.max(0, ((color >> 8) & 0xff) - ((offset >> 8) & 0xff));
+    const b = Math.max(0, (color & 0xff) - (offset & 0xff));
+    return (r << 16) | (g << 8) | b;
+  }
+
   /**
    * 创建像素风格飞机 - 增强版
    */
-  static createPlayerSprite(scene, x, y) {
+  static createPlayerSprite(scene, x, y, options = {}) {
+    const { addToScene = true } = options;
     const graphics = scene.add.graphics();
     const offsetX = 45; // 中心X偏移
     const offsetY = 42; // 中心Y偏移
@@ -17,24 +32,24 @@ export class AssetGenerator {
     graphics.fillStyle(0x000000, 0.3);
     graphics.fillRect(offsetX - 7, offsetY - 18, 14, 48);
 
-    // 机身主体 - 深绿色基底
-    graphics.fillStyle(0x00aa00, 1);
+    // 机身主体 - 霓虹青蓝基底
+    graphics.fillStyle(0x0088cc, 1);
     graphics.fillRect(offsetX - 8, offsetY - 20, 16, 50);
 
     // 机身高光层（中央亮条）
-    graphics.fillStyle(0x00ff44, 1);
+    graphics.fillStyle(0x00d4ff, 1);
     graphics.fillRect(offsetX - 3, offsetY - 18, 6, 46);
-    graphics.fillStyle(0x66ff99, 1);
+    graphics.fillStyle(0x66e6ff, 1);
     graphics.fillRect(offsetX - 2, offsetY - 16, 4, 42);
 
     // 机头（锐利三角形）
-    graphics.fillStyle(0x00ff00, 1);
+    graphics.fillStyle(0x00c8ff, 1);
     graphics.fillTriangle(
       offsetX, offsetY - 42,
       offsetX - 12, offsetY - 20,
       offsetX + 12, offsetY - 20
     );
-    graphics.fillStyle(0x88ffaa, 1);
+    graphics.fillStyle(0x99f0ff, 1);
     graphics.fillTriangle(
       offsetX, offsetY - 42,
       offsetX - 6, offsetY - 24,
@@ -42,7 +57,7 @@ export class AssetGenerator {
     );
 
     // 左机翼 - 多层设计
-    graphics.fillStyle(0x00cc00, 1);
+    graphics.fillStyle(0x0077aa, 1);
     graphics.fillRect(offsetX - 38, offsetY + 5, 30, 14);
     graphics.fillTriangle(
       offsetX - 38, offsetY + 5,
@@ -50,15 +65,15 @@ export class AssetGenerator {
       offsetX - 38, offsetY + 19
     );
     // 机翼高光
-    graphics.fillStyle(0x00ff44, 1);
+    graphics.fillStyle(0x00d4ff, 1);
     graphics.fillRect(offsetX - 36, offsetY + 7, 26, 4);
     // 机翼装甲线
-    graphics.lineStyle(1, 0x006600, 1);
+    graphics.lineStyle(1, 0x004466, 1);
     graphics.strokeRect(offsetX - 38, offsetY + 5, 30, 14);
 
     // 右机翼 - 多层设计
     graphics.lineStyle(0);
-    graphics.fillStyle(0x00cc00, 1);
+    graphics.fillStyle(0x0077aa, 1);
     graphics.fillRect(offsetX + 8, offsetY + 5, 30, 14);
     graphics.fillTriangle(
       offsetX + 38, offsetY + 5,
@@ -66,15 +81,15 @@ export class AssetGenerator {
       offsetX + 38, offsetY + 19
     );
     // 机翼高光
-    graphics.fillStyle(0x00ff44, 1);
+    graphics.fillStyle(0x00d4ff, 1);
     graphics.fillRect(offsetX + 10, offsetY + 7, 26, 4);
     // 机翼装甲线
-    graphics.lineStyle(1, 0x006600, 1);
+    graphics.lineStyle(1, 0x004466, 1);
     graphics.strokeRect(offsetX + 8, offsetY + 5, 30, 14);
 
     // 尾翼（更精致的设计）
     graphics.lineStyle(0);
-    graphics.fillStyle(0x00aa00, 1);
+    graphics.fillStyle(0x0077aa, 1);
     graphics.fillRect(offsetX - 7, offsetY + 30, 14, 10);
     graphics.fillTriangle(
       offsetX - 18, offsetY + 36,
@@ -87,31 +102,31 @@ export class AssetGenerator {
       offsetX + 7, offsetY + 40
     );
     // 尾翼装饰线
-    graphics.fillStyle(0x00ff44, 1);
+    graphics.fillStyle(0x00d4ff, 1);
     graphics.fillRect(offsetX - 5, offsetY + 32, 10, 2);
 
     // 驾驶舱窗口（带反光效果）
-    graphics.fillStyle(0x003300, 1);
+    graphics.fillStyle(0x001a2a, 1);
     graphics.fillRect(offsetX - 6, offsetY - 15, 12, 14);
-    graphics.fillStyle(0x00ffff, 0.6);
+    graphics.fillStyle(0x88f6ff, 0.7);
     graphics.fillRect(offsetX - 5, offsetY - 14, 4, 4);
     graphics.fillRect(offsetX + 1, offsetY - 12, 4, 4);
 
     // 引擎喷口（发光效果）
-    graphics.fillStyle(0xff8800, 1);
+    graphics.fillStyle(0xffb300, 1);
     graphics.fillCircle(offsetX - 4, offsetY + 35, 3);
     graphics.fillCircle(offsetX + 4, offsetY + 35, 3);
-    graphics.fillStyle(0xffff00, 1);
+    graphics.fillStyle(0xfff2a6, 1);
     graphics.fillCircle(offsetX - 4, offsetY + 35, 2);
     graphics.fillCircle(offsetX + 4, offsetY + 35, 2);
 
     // 机体装甲线条
-    graphics.lineStyle(1, 0x00ff00, 0.5);
+    graphics.lineStyle(1, 0x66e6ff, 0.6);
     graphics.strokeRect(offsetX - 8, offsetY - 20, 16, 50);
     graphics.strokeRect(offsetX - 6, offsetY, 12, 20);
 
     // 武器挂点装饰
-    graphics.fillStyle(0xffaa00, 1);
+    graphics.fillStyle(0xffcc4d, 1);
     graphics.fillCircle(offsetX - 12, offsetY + 12, 2);
     graphics.fillCircle(offsetX + 12, offsetY + 12, 2);
 
@@ -119,6 +134,7 @@ export class AssetGenerator {
     graphics.generateTexture('player', 90, 85);
     graphics.destroy();
 
+    if (!addToScene) return null;
     return scene.add.sprite(x, y, 'player');
   }
 
@@ -135,14 +151,14 @@ export class AssetGenerator {
     graphics.fillRect(offsetX - 7, offsetY - 28, 14, 48);
 
     // 主体颜色 - 深红色基底
-    const darkColor = color - 0x550000;
+    const darkColor = AssetGenerator.safeColorSub(color, 0x550000);
     graphics.fillStyle(darkColor, 1);
     graphics.fillRect(offsetX - 8, offsetY - 30, 16, 50);
 
     // 机身高光
     graphics.fillStyle(color, 1);
     graphics.fillRect(offsetX - 3, offsetY - 28, 6, 46);
-    const brightColor = color + 0x442200;
+    const brightColor = AssetGenerator.safeColorAdd(color, 0x442200);
     graphics.fillStyle(brightColor, 1);
     graphics.fillRect(offsetX - 2, offsetY - 26, 4, 42);
 
@@ -227,7 +243,7 @@ export class AssetGenerator {
     graphics.fillRect(offsetX + 1, offsetY + 1, 7, 19);
 
     // 子弹外壳（深色）
-    const darkColor = color - 0x444400;
+    const darkColor = AssetGenerator.safeColorSub(color, 0x444400);
     graphics.fillStyle(darkColor, 1);
     graphics.fillRect(offsetX + 0, offsetY + 0, 8, 20);
 
@@ -236,7 +252,7 @@ export class AssetGenerator {
     graphics.fillRect(offsetX + 1, offsetY + 1, 6, 18);
 
     // 子弹核心（亮色）
-    const brightColor = Math.min(color + 0x333300, 0xffffff);
+    const brightColor = AssetGenerator.safeColorAdd(color, 0x333300);
     graphics.fillStyle(brightColor, 1);
     graphics.fillRect(offsetX + 2, offsetY + 2, 4, 16);
 
@@ -415,9 +431,10 @@ export class AssetGenerator {
    * 生成所有临时资源
    */
   static generateAll(scene) {
+    this.createPlayerSprite(scene, 0, 0, { addToScene: false });
     this.createEnemySprite(scene);
-    this.createBulletSprite(scene, 'bullet', 0xffff00);
-    this.createBulletSprite(scene, 'enemy-bullet', 0xff6600);
+    this.createBulletSprite(scene, 'bullet', 0x00e5ff);
+    this.createBulletSprite(scene, 'enemy-bullet', 0xff2ad4);
     this.createXPOrbSprite(scene);
     this.createBossSprite(scene);
     this.createParticleSprite(scene);

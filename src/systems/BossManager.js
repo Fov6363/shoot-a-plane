@@ -109,6 +109,11 @@ export class BossManager {
 
     // 显示阶段完成
     this.showStageComplete();
+
+    // 延迟 2.5 秒后打开商店
+    this.scene.time.delayedCall(2500, () => {
+      this.scene.events.emit('open-shop');
+    });
   }
 
   /**
@@ -146,6 +151,15 @@ export class BossManager {
    */
   isInBossPhase() {
     return this.inBossPhase;
+  }
+
+  /**
+   * 获取距离下一个BOSS的剩余时间（秒）
+   */
+  getTimeToNextBoss() {
+    if (this.inBossPhase) return 0;
+    const remaining = GAME_CONFIG.BOSS.STAGE_DURATION - this.stageTimer;
+    return Math.max(0, Math.ceil(remaining / 1000));
   }
 
   /**

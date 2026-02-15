@@ -9,7 +9,7 @@ export class EnemySpawner {
 
     // 生成参数
     this.spawnTimer = 0;
-    this.baseSpawnInterval = 400; // 基础生成间隔（ms）- 3倍频率
+    this.baseSpawnInterval = 280; // 基础生成间隔（ms）- 提升节奏
     this.currentSpawnInterval = this.baseSpawnInterval;
 
     // 难度参数
@@ -19,7 +19,6 @@ export class EnemySpawner {
 
     // 敌人组（从外部传入，确保碰撞检测正确）
     this.enemies = enemyGroup;
-    console.log('EnemySpawner 接收到敌人组:', this.enemies);
 
     // 已激活的敌人类型
     this.activeEnemyTypes = ['BASIC', 'SHOOTER'];
@@ -57,13 +56,13 @@ export class EnemySpawner {
    * 随时间更新难度
    */
   updateDifficulty() {
-    // 每30秒增加一次难度
-    const difficultyLevel = Math.floor(this.gameTime / 30);
+    // 每20秒增加一次难度
+    const difficultyLevel = Math.floor(this.gameTime / 20);
 
-    // 难度倍率：每30秒增加10%
+    // 难度倍率：每20秒增加10%
     this.difficultyMultiplier = 1 + difficultyLevel * 0.1;
 
-    // 生成速度：每30秒减少10%间隔（最多减少50%）
+    // 生成速度：每20秒减少10%间隔（最多减少50%）
     const spawnSpeedUp = Math.min(difficultyLevel * 0.1, 0.5);
     this.currentSpawnInterval = this.baseSpawnInterval * (1 - spawnSpeedUp);
 
@@ -108,7 +107,8 @@ export class EnemySpawner {
     }
 
     // 应用难度倍率
-    enemy.maxHp = Math.floor(enemy.maxHp * this.difficultyMultiplier);
+    // 全局小怪血量下调20%，并叠加难度倍率
+    enemy.maxHp = Math.max(1, Math.round(enemy.maxHp * this.difficultyMultiplier * 0.8));
     enemy.hp = enemy.maxHp;
 
     // 基础速度提升20%，然后随难度继续增加
@@ -119,23 +119,6 @@ export class EnemySpawner {
 
     // 重要：添加到组后必须重新设置速度，因为组会重置速度为0
     enemy.setVelocityY(enemy.baseSpeed);
-
-    console.log('修复后的速度:', enemy.body.velocity.y);
-
-    console.log('生成敌人:', {
-      type: type,
-      position: { x: enemy.x, y: enemy.y },
-      hp: enemy.hp,
-      visible: enemy.visible,
-      active: enemy.active,
-      texture: enemy.texture.key,
-      displayWidth: enemy.displayWidth,
-      displayHeight: enemy.displayHeight,
-      hasBody: !!enemy.body,
-      bodyEnabled: enemy.body ? enemy.body.enable : 'no body',
-      velocity: enemy.body ? { x: enemy.body.velocity.x, y: enemy.body.velocity.y } : 'no body',
-      baseSpeed: enemy.baseSpeed
-    });
   }
 
   /**

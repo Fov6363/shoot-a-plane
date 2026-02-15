@@ -14,11 +14,12 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
 
     this.stage = stage;
 
-    // BOSS属性
-    this.maxHp = GAME_CONFIG.BOSS.BASE_HP * stage;
+    // BOSS属性（递增式而非倍数式）
+    this.maxHp = GAME_CONFIG.BOSS.BASE_HP + GAME_CONFIG.BOSS.HP_PER_STAGE * (stage - 1);
     this.hp = this.maxHp;
     this.scoreValue = GAME_CONFIG.BOSS.BASE_SCORE * stage;
     this.xpValue = GAME_CONFIG.EXPERIENCE.BOSS_XP;
+    this.goldValue = GAME_CONFIG.GOLD.BOSS_BASE_GOLD + GAME_CONFIG.GOLD.BOSS_GOLD_PER_STAGE * stage;
 
     // 移动参数
     this.moveSpeed = 100;
@@ -80,6 +81,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
       y: this.y,
       xp: this.xpValue,
       score: this.scoreValue,
+      gold: this.goldValue,
       stage: this.stage
     });
 

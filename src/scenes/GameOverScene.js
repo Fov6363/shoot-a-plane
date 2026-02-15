@@ -135,10 +135,13 @@ export class GameOverScene extends Phaser.Scene {
       this.scene.start('MenuScene');
     });
 
-    // 提示文本
-    this.add.text(width / 2, height - 50, '[空格] 重新开始    [ESC] 返回菜单', {
-      fontSize: '16px',
-      fill: '#666666'
-    }).setOrigin(0.5);
+    // 提示文本（触屏设备隐藏）
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (!isTouchDevice) {
+      this.add.text(width / 2, height - 50, '[空格] 重新开始    [ESC] 返回菜单', {
+        fontSize: '16px',
+        fill: '#666666'
+      }).setOrigin(0.5);
+    }
   }
 }

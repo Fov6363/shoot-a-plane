@@ -5,6 +5,7 @@ import { GAME_CONFIG } from './config/gameConfig.ts';
 import { BootScene } from './scenes/BootScene.js';
 import { MenuScene } from './scenes/MenuScene.js';
 import { UpgradeScene } from './scenes/UpgradeScene.js';
+import { ShopScene } from './scenes/ShopScene.js';
 import { GameScene } from './scenes/GameScene.js';
 import { GameOverScene } from './scenes/GameOverScene.js';
 
@@ -14,6 +15,10 @@ const config = {
   height: GAME_CONFIG.HEIGHT,
   parent: 'game-container',
   backgroundColor: '#0a0a1a',
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
   physics: {
     default: 'arcade',
     arcade: {
@@ -21,7 +26,7 @@ const config = {
       debug: false
     }
   },
-  scene: [BootScene, MenuScene, UpgradeScene, GameScene, GameOverScene]
+  scene: [BootScene, MenuScene, UpgradeScene, ShopScene, GameScene, GameOverScene]
 };
 
 const game = new Phaser.Game(config);

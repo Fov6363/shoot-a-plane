@@ -19,6 +19,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.hp = config.hp;
     this.scoreValue = config.score;
     this.xpValue = config.xp;
+    this.goldValue = config.gold || 0;
     this.baseSpeed = config.speed;
 
     this.setVelocityY(this.baseSpeed);
@@ -28,7 +29,6 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
    * 受伤
    */
   takeDamage(amount) {
-    console.log('Enemy.takeDamage 被调用，伤害:', amount, '当前HP:', this.hp, '扣血后HP:', this.hp - amount);
     this.hp -= amount;
 
     // 受伤闪烁
@@ -38,11 +38,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     });
 
     if (this.hp <= 0) {
-      console.log('HP <= 0，调用 onDeath()');
       this.onDeath();
       return true;
     }
-    console.log('敌人还活着，HP:', this.hp);
     return false;
   }
 
@@ -50,14 +48,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
    * 死亡处理
    */
   onDeath() {
-    console.log('敌人死亡，类型:', this.enemyType, 'XP:', this.xpValue, '分数:', this.scoreValue);
-
     // 掉落经验球
     this.scene.events.emit('enemy-killed', {
       x: this.x,
       y: this.y,
       xp: this.xpValue,
-      score: this.scoreValue
+      score: this.scoreValue,
+      gold: this.goldValue
     });
 
     // 销毁特效

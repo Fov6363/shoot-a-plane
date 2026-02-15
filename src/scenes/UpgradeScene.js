@@ -1,5 +1,7 @@
 // src/scenes/UpgradeScene.js
 
+import { getRandomUpgrades } from '../config/upgrades.js';
+
 export class UpgradeScene extends Phaser.Scene {
   constructor() {
     super({ key: 'UpgradeScene' });
@@ -28,8 +30,14 @@ export class UpgradeScene extends Phaser.Scene {
       fill: '#888888'
     }).setOrigin(0.5);
 
+    // 容器用于方便重建卡片
+    this.cardsContainer = this.add.container(0, 0);
+
     // 显示3个升级卡片
     this.createUpgradeCards();
+
+    // 刷新令牌按钮
+    this.createRerollButton();
   }
 
   /**
@@ -91,13 +99,17 @@ export class UpgradeScene extends Phaser.Scene {
     });
     desc.setOrigin(0.5);
 
-    // 数字键提示
+    // 数字键提示（触屏设备隐藏）
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const keyHint = this.add.text(0, height / 2 - 30, `[${index + 1}]`, {
       fontSize: '20px',
       fill: '#00ff00',
       fontStyle: 'bold'
     });
     keyHint.setOrigin(0.5);
+    if (isTouchDevice) {
+      keyHint.setVisible(false);
+    }
 
     container.add([bg, title, typeLabel, desc, keyHint]);
 
@@ -132,6 +144,86 @@ export class UpgradeScene extends Phaser.Scene {
     this.input.keyboard.on(`keydown-${index + 1}`, () => {
       this.selectUpgrade(upgrade.id);
     });
+
+    this.cardsContainer.add(container);
+  }
+
+  /**
+   * 创建刷新令牌按钮
+   */
+  createRerollButton() {
+    const { width, height } = this.cameras.main;
+
+    // 获取 GameScene 的 player 引用
+    const gameScene = this.scene.get('GameScene');
+    const player = gameScene ? gameScene.player : null;
+    const tokens = player ? (player.rerollTokens || 0) : 0;
+
+    if (tokens <= 0) return;
+
+    // 刷新按钮
+    const btnY = height - 50;
+    const btnBg = this.add.rectangle(width / 2, btnY, 200, 40, 0x224422, 0.9);
+    btnBg.setStrokeStyle(2, 0x44ff44);
+    btnBg.setInteractive({ useHandCursor: true });
+
+    this.rerollText = this.add.text(width / 2, btnY, `🔄 刷新选项 (${tokens})`, {
+      fontSize: '16px',
+      fill: '#44ff44',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    btnBg.on('pointerover', () => {
+      btnBg.setFillStyle(0x336633, 0.9);
+    });
+
+    btnBg.on('pointerout', () => {
+      btnBg.setFillStyle(0x224422, 0.9);
+    });
+
+    btnBg.on('pointerdown', () => {
+      this.doReroll(player, btnBg);
+    });
+
+    // R 键刷新
+    this.input.keyboard.on('keydown-R', () => {
+      this.doReroll(player, btnBg);
+    });
+
+    this.rerollBtn = btnBg;
+  }
+
+  /**
+   * 执行刷新
+   */
+  doReroll(player, btnBg) {
+    if (!player || player.rerollTokens <= 0) return;
+
+    player.rerollTokens--;
+
+    // 获取新的升级选项
+    const gameScene = this.scene.get('GameScene');
+    const newOptions = gameScene.upgradeSystem.getUpgradeOptions(3);
+    this.upgradeOptions = newOptions;
+
+    // 清除旧卡片
+    this.cardsContainer.removeAll(true);
+    this.input.keyboard.removeAllListeners();
+
+    // 重建卡片
+    this.createUpgradeCards();
+
+    // 更新刷新按钮
+    if (player.rerollTokens <= 0) {
+      if (btnBg) btnBg.destroy();
+      if (this.rerollText) this.rerollText.destroy();
+    } else {
+      this.rerollText.setText(`🔄 刷新选项 (${player.rerollTokens})`);
+      // 重新注册 R 键
+      this.input.keyboard.on('keydown-R', () => {
+        this.doReroll(player, btnBg);
+      });
+    }
   }
 
   /**

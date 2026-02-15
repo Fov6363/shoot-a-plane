@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, viewport-fit=cover">
   <title>飞机大战 - Roguelike Shooter</title>
   <style>
     * {
@@ -17,6 +17,11 @@
       min-height: 100vh;
       background: #1a1a2e;
       font-family: 'Courier New', monospace;
+      touch-action: none;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
     }
     #game-container {
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
