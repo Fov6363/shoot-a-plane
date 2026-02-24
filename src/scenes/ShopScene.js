@@ -1,6 +1,7 @@
 // src/scenes/ShopScene.js
 
 import { SHOP_ITEMS, SHOP_CATEGORIES, getShopItemsForDisplay } from '../config/shopItems.js';
+import { GAME_CONFIG } from '../config/gameConfig.ts';
 
 export class ShopScene extends Phaser.Scene {
   constructor() {
@@ -14,6 +15,7 @@ export class ShopScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.cameras.main;
+    this.isPortrait = GAME_CONFIG.IS_PORTRAIT;
 
     // 半透明背景
     const bg = this.add.rectangle(0, 0, width, height, 0x000000, 0.85);
@@ -21,7 +23,7 @@ export class ShopScene extends Phaser.Scene {
 
     // 标题
     this.add.text(width / 2, 30, '═══ 商 店 ═══', {
-      fontSize: '32px',
+      fontSize: this.isPortrait ? '26px' : '32px',
       fill: '#ffe14a',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -98,10 +100,10 @@ export class ShopScene extends Phaser.Scene {
     const { width } = this.cameras.main;
     const items = getShopItemsForDisplay(this.player);
 
-    const cols = 3;
-    const cardW = 200;
-    const cardH = 115;
-    const spacingX = 16;
+    const cols = this.isPortrait ? 2 : 3;
+    const cardW = this.isPortrait ? Math.round((width - 48) / 2) : 200;
+    const cardH = this.isPortrait ? 125 : 115;
+    const spacingX = this.isPortrait ? 12 : 16;
     const spacingY = 12;
     const startY = 95;
 

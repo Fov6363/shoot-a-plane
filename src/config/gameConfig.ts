@@ -2,10 +2,14 @@
 
 import type { GameConfig } from '../types';
 
+// 检测屏幕方向
+const isPortrait = typeof window !== 'undefined' && window.innerWidth < window.innerHeight;
+
 export const GAME_CONFIG: GameConfig = {
-  // 游戏尺寸
-  WIDTH: 800,
-  HEIGHT: 600,
+  // 游戏尺寸（竖屏 480x854，横屏 800x600）
+  WIDTH: isPortrait ? 480 : 800,
+  HEIGHT: isPortrait ? 854 : 600,
+  IS_PORTRAIT: isPortrait,
 
   // 玩家配置
   PLAYER: {

@@ -1,6 +1,7 @@
 // src/scenes/UpgradeScene.js
 
 import { getRandomUpgrades } from '../config/upgrades.js';
+import { GAME_CONFIG } from '../config/gameConfig.ts';
 
 export class UpgradeScene extends Phaser.Scene {
   constructor() {
@@ -13,20 +14,21 @@ export class UpgradeScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.cameras.main;
+    this.isPortrait = GAME_CONFIG.IS_PORTRAIT;
 
     // 半透明背景
     const bg = this.add.rectangle(0, 0, width, height, 0x000000, 0.8);
     bg.setOrigin(0, 0);
 
     // 标题
-    this.add.text(width / 2, 80, '选择升级', {
-      fontSize: '36px',
+    this.add.text(width / 2, this.isPortrait ? 50 : 80, '选择升级', {
+      fontSize: this.isPortrait ? '30px' : '36px',
       fill: '#00ff00',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    this.add.text(width / 2, 120, 'CHOOSE AN UPGRADE', {
-      fontSize: '16px',
+    this.add.text(width / 2, this.isPortrait ? 85 : 120, 'CHOOSE AN UPGRADE', {
+      fontSize: this.isPortrait ? '14px' : '16px',
       fill: '#888888'
     }).setOrigin(0.5);
 
@@ -45,21 +47,37 @@ export class UpgradeScene extends Phaser.Scene {
    */
   createUpgradeCards() {
     const { width, height } = this.cameras.main;
-    const cardWidth = 220;
-    const cardHeight = 280;
-    const spacing = 30;
-    const startX = (width - (cardWidth * 3 + spacing * 2)) / 2;
-    const cardY = height / 2 + 20;
 
     // 存储键盘监听器引用以便精确移除
     this._keyListeners = [];
 
-    this.upgradeOptions.forEach((option, index) => {
-      const x = startX + (cardWidth + spacing) * index + cardWidth / 2;
-      const y = cardY;
+    if (this.isPortrait) {
+      // 竖屏：纵向排列，卡片宽度占 80%
+      const cardWidth = Math.round(width * 0.8);
+      const cardHeight = 180;
+      const spacing = 16;
+      const totalH = this.upgradeOptions.length * cardHeight + (this.upgradeOptions.length - 1) * spacing;
+      const startY = (height - totalH) / 2;
 
-      this.createCard(x, y, cardWidth, cardHeight, option, index);
-    });
+      this.upgradeOptions.forEach((option, index) => {
+        const x = width / 2;
+        const y = startY + (cardHeight + spacing) * index + cardHeight / 2;
+        this.createCard(x, y, cardWidth, cardHeight, option, index);
+      });
+    } else {
+      // 横屏：横向排列（原逻辑）
+      const cardWidth = 220;
+      const cardHeight = 280;
+      const spacing = 30;
+      const startX = (width - (cardWidth * 3 + spacing * 2)) / 2;
+      const cardY = height / 2 + 20;
+
+      this.upgradeOptions.forEach((option, index) => {
+        const x = startX + (cardWidth + spacing) * index + cardWidth / 2;
+        const y = cardY;
+        this.createCard(x, y, cardWidth, cardHeight, option, index);
+      });
+    }
   }
 
   /**
@@ -183,8 +201,9 @@ export class UpgradeScene extends Phaser.Scene {
     if (tokens <= 0) return;
 
     // 刷新按钮
-    const btnY = height - 50;
-    const btnBg = this.add.rectangle(width / 2, btnY, 200, 40, 0x224422, 0.9);
+    const btnY = height - (this.isPortrait ? 35 : 50);
+    const btnW = this.isPortrait ? Math.round(width * 0.5) : 200;
+    const btnBg = this.add.rectangle(width / 2, btnY, btnW, 40, 0x224422, 0.9);
     btnBg.setStrokeStyle(2, 0x44ff44);
     btnBg.setInteractive({ useHandCursor: true });
 

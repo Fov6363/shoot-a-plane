@@ -3,6 +3,7 @@
 export interface GameConfig {
   WIDTH: number;
   HEIGHT: number;
+  IS_PORTRAIT: boolean;
   PLAYER: PlayerConfig;
   EXPERIENCE: ExperienceConfig;
   BOSS: BossConfig;

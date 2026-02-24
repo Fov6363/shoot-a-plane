@@ -23,7 +23,8 @@ export class GameScene extends Phaser.Scene {
 
     // 创建玩家
     const { width, height } = this.cameras.main;
-    this.player = new Player(this, width / 2, height - 100);
+    this.isPortrait = GAME_CONFIG.IS_PORTRAIT;
+    this.player = new Player(this, width / 2, height - (this.isPortrait ? 120 : 100));
 
     // 创建输入管理器
     this.inputManager = new InputManager(this);
@@ -302,7 +303,9 @@ export class GameScene extends Phaser.Scene {
    * 创建UI
    */
   createUI() {
-    const { width } = this.cameras.main;
+    const { width, height } = this.cameras.main;
+    const isP = this.isPortrait;
+    const panelW = isP ? Math.min(width * 0.45, 200) : 220;
 
     const panelStyle = {
       fillColor: 0x0b1020,
@@ -312,16 +315,17 @@ export class GameScene extends Phaser.Scene {
       strokeWidth: 1
     };
 
-    const leftPanel = this.add.rectangle(12, 12, 220, 86, panelStyle.fillColor, panelStyle.fillAlpha)
+    const leftPanel = this.add.rectangle(12, 12, panelW, 86, panelStyle.fillColor, panelStyle.fillAlpha)
       .setOrigin(0, 0);
     leftPanel.setStrokeStyle(panelStyle.strokeWidth, panelStyle.strokeColor, panelStyle.strokeAlpha);
 
-    const rightPanel = this.add.rectangle(width - 232, 12, 220, 78, panelStyle.fillColor, panelStyle.fillAlpha)
+    const rightPanel = this.add.rectangle(width - panelW - 12, 12, panelW, 78, panelStyle.fillColor, panelStyle.fillAlpha)
       .setOrigin(0, 0);
     rightPanel.setStrokeStyle(panelStyle.strokeWidth, panelStyle.strokeColor, panelStyle.strokeAlpha);
 
+    const fontSize = isP ? '16px' : '18px';
     const textStyle = {
-      fontSize: '18px',
+      fontSize,
       fontFamily: 'monospace',
       fill: '#e6f7ff',
       stroke: '#001018',
@@ -331,7 +335,7 @@ export class GameScene extends Phaser.Scene {
     // 左上角：生命值
     this.hpText = this.add.text(20, 20, '', {
       ...textStyle,
-      fontSize: '20px'
+      fontSize: isP ? '18px' : '20px'
     });
 
     // 等级和经验条
@@ -340,16 +344,18 @@ export class GameScene extends Phaser.Scene {
       fill: '#00f6ff'
     });
 
-    this.xpBarBg = this.add.rectangle(20, 80, 200, 10, 0x0e2233);
+    const xpBarW = panelW - 20;
+    this.xpBarBg = this.add.rectangle(20, 80, xpBarW, 10, 0x0e2233);
     this.xpBarBg.setOrigin(0, 0);
 
     this.xpBar = this.add.rectangle(20, 80, 0, 10, 0x00e5ff);
     this.xpBar.setOrigin(0, 0);
+    this._xpBarMaxW = xpBarW;
 
     // 右上角：分数、阶段、金币
     this.scoreText = this.add.text(width - 20, 20, '', {
       ...textStyle,
-      fontSize: '20px',
+      fontSize: isP ? '18px' : '20px',
       fill: '#ffe14a'
     }).setOrigin(1, 0);
 
@@ -360,13 +366,13 @@ export class GameScene extends Phaser.Scene {
 
     this.goldText = this.add.text(width - 20, 72, '', {
       ...textStyle,
-      fontSize: '16px',
+      fontSize: isP ? '14px' : '16px',
       fill: '#ffd700'
     }).setOrigin(1, 0);
 
     // 连击显示（屏幕中央偏上）
-    this.comboText = this.add.text(width / 2, 100, '', {
-      fontSize: '52px',
+    this.comboText = this.add.text(width / 2, isP ? 130 : 100, '', {
+      fontSize: isP ? '44px' : '52px',
       fill: '#ff2ad4',
       fontStyle: 'bold',
       stroke: '#120018',
@@ -383,8 +389,8 @@ export class GameScene extends Phaser.Scene {
     }).setOrigin(0.5, 0);
 
     // 技能CD提示（左下角）
-    this.abilityCDText = this.add.text(20, this.cameras.main.height - 30, '', {
-      fontSize: '14px',
+    this.abilityCDText = this.add.text(20, height - 30, '', {
+      fontSize: isP ? '12px' : '14px',
       fontFamily: 'monospace',
       fill: '#aaaaaa',
       stroke: '#000000',
@@ -401,8 +407,8 @@ export class GameScene extends Phaser.Scene {
    */
   createTouchSkillButtons() {
     const { width, height } = this.cameras.main;
-    const btnSize = 50;
-    const margin = 15;
+    const btnSize = this.isPortrait ? 60 : 50;
+    const margin = this.isPortrait ? 18 : 15;
     const baseX = width - margin - btnSize / 2;
     const baseY = height - margin - btnSize / 2;
 
@@ -423,7 +429,7 @@ export class GameScene extends Phaser.Scene {
    * 创建单个技能按钮
    */
   createSkillButton(x, y, label, color, callback) {
-    const btnSize = 50;
+    const btnSize = this.isPortrait ? 60 : 50;
     const circle = this.add.circle(x, y, btnSize / 2, color, 0.35);
     circle.setStrokeStyle(2, color, 0.8);
     circle.setDepth(900);
@@ -439,7 +445,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     const text = this.add.text(x, y, label, {
-      fontSize: '18px',
+      fontSize: this.isPortrait ? '20px' : '18px',
       fill: '#ffffff',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -518,7 +524,7 @@ export class GameScene extends Phaser.Scene {
    */
   createBossHPBar() {
     const { width } = this.cameras.main;
-    const barWidth = 400;
+    const barWidth = Math.round(width * 0.6);
     const barHeight = 20;
     const x = width / 2 - barWidth / 2;
     const y = 30;
@@ -578,7 +584,7 @@ export class GameScene extends Phaser.Scene {
    * 更新BOSS血条
    */
   updateBossHPBar(progress) {
-    const barWidth = 400;
+    const barWidth = Math.round(this.cameras.main.width * 0.6);
     this.bossHPBarFill.width = barWidth * progress;
   }
 
@@ -593,7 +599,7 @@ export class GameScene extends Phaser.Scene {
     // 等级和经验
     const expData = this.experienceSystem.getData();
     this.levelText.setText(`Level ${expData.level}`);
-    this.xpBar.width = 200 * expData.progress;
+    this.xpBar.width = this._xpBarMaxW * expData.progress;
 
     // 分数
     this.scoreText.setText(`Score: ${this.score}`);
