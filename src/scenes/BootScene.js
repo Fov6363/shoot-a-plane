@@ -33,6 +33,7 @@ export class BootScene extends Phaser.Scene {
 
     const loadingText = this.add.text(width / 2, height / 2 - 50, '加载中...', {
       fontSize: '20px',
+      fontFamily: 'monospace',
       fill: '#ffffff'
     });
     loadingText.setOrigin(0.5);

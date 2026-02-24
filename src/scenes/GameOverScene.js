@@ -27,6 +27,7 @@ export class GameOverScene extends Phaser.Scene {
     // 标题
     this.add.text(width / 2, isP ? 80 : 100, 'GAME OVER', {
       fontSize: isP ? '48px' : '64px',
+      fontFamily: 'monospace',
       fill: '#ff0000',
       fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -35,6 +36,7 @@ export class GameOverScene extends Phaser.Scene {
     if (isNewHighScore) {
       const newRecordText = this.add.text(width / 2, isP ? 135 : 170, 'NEW HIGH SCORE!', {
         fontSize: isP ? '20px' : '24px',
+        fontFamily: 'monospace',
         fill: '#ffff00',
         fontStyle: 'bold'
       }).setOrigin(0.5);
@@ -55,6 +57,7 @@ export class GameOverScene extends Phaser.Scene {
 
     this.add.text(width / 2, statsY, '游戏统计', {
       fontSize: isP ? '24px' : '28px',
+      fontFamily: 'monospace',
       fill: '#00ff00',
       fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -62,24 +65,28 @@ export class GameOverScene extends Phaser.Scene {
     // 最终分数
     this.add.text(width / 2, statsY + lineHeight, `最终分数: ${this.finalScore}`, {
       fontSize: isP ? '20px' : '24px',
+      fontFamily: 'monospace',
       fill: '#ffffff'
     }).setOrigin(0.5);
 
     // 到达阶段
     this.add.text(width / 2, statsY + lineHeight * 2, `到达阶段: ${this.finalStage}`, {
       fontSize: isP ? '18px' : '20px',
+      fontFamily: 'monospace',
       fill: '#cccccc'
     }).setOrigin(0.5);
 
     // 最高分
     this.add.text(width / 2, statsY + lineHeight * 3, `最高分: ${saveData.highScore}`, {
       fontSize: isP ? '18px' : '20px',
+      fontFamily: 'monospace',
       fill: '#ffff00'
     }).setOrigin(0.5);
 
     // 游戏次数
     this.add.text(width / 2, statsY + lineHeight * 4, `总游戏次数: ${saveData.gamesPlayed}`, {
       fontSize: isP ? '16px' : '18px',
+      fontFamily: 'monospace',
       fill: '#888888'
     }).setOrigin(0.5);
 
@@ -91,6 +98,7 @@ export class GameOverScene extends Phaser.Scene {
 
       const restartButton = this.add.text(width / 2, btn1Y, '重新开始', {
         fontSize: '28px',
+        fontFamily: 'monospace',
         fill: '#ffffff',
         backgroundColor: '#00aa00',
         padding: { x: 30, y: 12 }
@@ -109,6 +117,7 @@ export class GameOverScene extends Phaser.Scene {
 
       const menuButton = this.add.text(width / 2, btn2Y, '返回菜单', {
         fontSize: '28px',
+        fontFamily: 'monospace',
         fill: '#ffffff',
         backgroundColor: '#333333',
         padding: { x: 30, y: 12 }
@@ -129,6 +138,7 @@ export class GameOverScene extends Phaser.Scene {
 
       const restartButton = this.add.text(width / 2 - 100, buttonsY, '重新开始', {
         fontSize: '28px',
+        fontFamily: 'monospace',
         fill: '#ffffff',
         backgroundColor: '#00aa00',
         padding: { x: 20, y: 10 }
@@ -147,6 +157,7 @@ export class GameOverScene extends Phaser.Scene {
 
       const menuButton = this.add.text(width / 2 + 100, buttonsY, '返回菜单', {
         fontSize: '28px',
+        fontFamily: 'monospace',
         fill: '#ffffff',
         backgroundColor: '#333333',
         padding: { x: 20, y: 10 }
@@ -178,6 +189,7 @@ export class GameOverScene extends Phaser.Scene {
     if (!isTouchDevice) {
       this.add.text(width / 2, height - 50, '[空格] 重新开始    [ESC] 返回菜单', {
         fontSize: '16px',
+        fontFamily: 'monospace',
         fill: '#666666'
       }).setOrigin(0.5);
     }

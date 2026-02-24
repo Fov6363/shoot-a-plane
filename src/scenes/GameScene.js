@@ -391,6 +391,7 @@ export class GameScene extends Phaser.Scene {
     // 连击显示（屏幕中央偏上）
     this.comboText = this.add.text(width / 2, isP ? 130 : 100, '', {
       fontSize: isP ? '44px' : '52px',
+      fontFamily: 'monospace',
       fill: '#ff2ad4',
       fontStyle: 'bold',
       stroke: '#120018',
@@ -464,6 +465,7 @@ export class GameScene extends Phaser.Scene {
 
     const text = this.add.text(x, y, label, {
       fontSize: this.isPortrait ? '20px' : '18px',
+      fontFamily: 'monospace',
       fill: '#ffffff',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -557,6 +559,7 @@ export class GameScene extends Phaser.Scene {
 
     const label = this.add.text(width / 2, y - 10, 'BOSS', {
       fontSize: '16px',
+      fontFamily: 'monospace',
       fill: '#ff0000',
       fontStyle: 'bold'
     }).setOrigin(0.5, 1);
@@ -831,6 +834,7 @@ export class GameScene extends Phaser.Scene {
     // 掉血飘字（在玩家头顶显示大号 -1）
     const dmgText = this.add.text(player.x, player.y - 40, `-1 HP`, {
       fontSize: '36px',
+      fontFamily: 'monospace',
       fill: '#ff3333',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -1224,6 +1228,7 @@ export class GameScene extends Phaser.Scene {
   showDamageNumber(x, y, damage) {
     const text = this.add.text(x, y, `-${damage}`, {
       fontSize: '32px',
+      fontFamily: 'monospace',
       fill: '#ffff00',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -1246,6 +1251,7 @@ export class GameScene extends Phaser.Scene {
   showCritDamageNumber(x, y, damage) {
     const text = this.add.text(x, y, `CRIT -${damage}`, {
       fontSize: '40px',
+      fontFamily: 'monospace',
       fill: '#ff4444',
       fontStyle: 'bold',
       stroke: '#ffff00',
@@ -1271,6 +1277,7 @@ export class GameScene extends Phaser.Scene {
   showScorePopup(x, y, score) {
     const text = this.add.text(x, y, `+${score}`, {
       fontSize: '24px',
+      fontFamily: 'monospace',
       fill: '#00ff00',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -1293,6 +1300,7 @@ export class GameScene extends Phaser.Scene {
   showGoldPopup(x, y, amount) {
     const text = this.add.text(x + 20, y - 10, `+${amount} 💰`, {
       fontSize: '18px',
+      fontFamily: 'monospace',
       fill: '#ffd700',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -1395,12 +1403,14 @@ export class GameScene extends Phaser.Scene {
     const buildName = upgrade.buildPath ? (BUILD_PATH_NAMES[upgrade.buildPath] || '通用') : '通用';
     const buildLabel = this.add.text(w / 2 - 6, -h / 2 + 6, buildName, {
       fontSize: '10px',
+      fontFamily: 'monospace',
       fill: '#' + buildColor.toString(16).padStart(6, '0'),
     }).setOrigin(1, 0);
 
     // 名称
     const nameText = this.add.text(0, -h / 2 + 22, upgrade.name, {
       fontSize: '14px',
+      fontFamily: 'monospace',
       fill: '#ffffff',
       fontStyle: 'bold',
       align: 'center',
@@ -1410,6 +1420,7 @@ export class GameScene extends Phaser.Scene {
     // 描述
     const descText = this.add.text(0, 4, upgrade.description, {
       fontSize: '11px',
+      fontFamily: 'monospace',
       fill: '#cccccc',
       align: 'center',
       wordWrap: { width: w - 16 },
@@ -1419,12 +1430,14 @@ export class GameScene extends Phaser.Scene {
     const levelStr = upgrade.currentLevel > 0 ? `Lv.${upgrade.currentLevel}` : '';
     const levelText = this.add.text(0, h / 2 - 16, levelStr, {
       fontSize: '11px',
+      fontFamily: 'monospace',
       fill: '#ffff00',
     }).setOrigin(0.5);
 
     // 键盘提示
     const keyHint = this.add.text(w / 2 - 6, h / 2 - 6, `[${index + 1}]`, {
       fontSize: '12px',
+      fontFamily: 'monospace',
       fill: '#00ff00',
     }).setOrigin(1, 1);
     if (this.isTouchDevice) keyHint.setVisible(false);
@@ -1473,6 +1486,7 @@ export class GameScene extends Phaser.Scene {
 
     this.upgradeCountdownText = this.add.text(cx, cy, '3', {
       fontSize: '16px',
+      fontFamily: 'monospace',
       fill: '#00ff00',
       fontStyle: 'bold',
     }).setOrigin(0.5).setDepth(2001);
@@ -1594,6 +1608,7 @@ export class GameScene extends Phaser.Scene {
 
     const btnText = this.add.text(btnX, btnY, `刷新 (${tokens})`, {
       fontSize: '14px',
+      fontFamily: 'monospace',
       fill: '#44ff44',
       fontStyle: 'bold',
     }).setOrigin(0.5);

@@ -25,6 +25,7 @@ export class ShopScene extends Phaser.Scene {
     // 标题
     this.add.text(width / 2, 30, '═══ 商 店 ═══', {
       fontSize: this.isPortrait ? '26px' : '32px',
+      fontFamily: 'monospace',
       fill: '#ffe14a',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -34,6 +35,7 @@ export class ShopScene extends Phaser.Scene {
     // 金币显示
     this.goldText = this.add.text(width / 2, 65, '', {
       fontSize: '22px',
+      fontFamily: 'monospace',
       fill: '#ffd700',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -53,6 +55,7 @@ export class ShopScene extends Phaser.Scene {
 
     const closeBtnText = this.add.text(width / 2, height - 25, '关闭商店', {
       fontSize: '18px',
+      fontFamily: 'monospace',
       fill: '#cccccc',
     }).setOrigin(0.5);
 
@@ -158,6 +161,7 @@ export class ShopScene extends Phaser.Scene {
     const buildName = item.buildPath ? (BUILD_PATH_NAMES[item.buildPath] || '通用') : '通用';
     const buildLabel = this.add.text(w / 2 - 8, -h / 2 + 8, buildName, {
       fontSize: '10px',
+      fontFamily: 'monospace',
       fill: soldOut ? '#444444' : ('#' + buildColor.toString(16).padStart(6, '0')),
     }).setOrigin(1, 0);
 
@@ -165,6 +169,7 @@ export class ShopScene extends Phaser.Scene {
     const nameColor = soldOut ? '#666666' : '#ffffff';
     const nameText = this.add.text(0, -h / 2 + 18, item.name, {
       fontSize: '16px',
+      fontFamily: 'monospace',
       fill: nameColor,
       fontStyle: 'bold',
       align: 'center',
@@ -174,6 +179,7 @@ export class ShopScene extends Phaser.Scene {
     const descColor = soldOut ? '#555555' : '#aaaaaa';
     const descText = this.add.text(0, -2, item.description, {
       fontSize: '12px',
+      fontFamily: 'monospace',
       fill: descColor,
       align: 'center',
       wordWrap: { width: w - 20 },
@@ -184,6 +190,7 @@ export class ShopScene extends Phaser.Scene {
     const catColor = this.getCategoryColor(item.category);
     const catText = this.add.text(-w / 2 + 12, h / 2 - 22, categoryLabel, {
       fontSize: '11px',
+      fontFamily: 'monospace',
       fill: soldOut ? '#444444' : catColor,
     }).setOrigin(0, 0.5);
 
@@ -192,6 +199,7 @@ export class ShopScene extends Phaser.Scene {
     const priceStr = soldOut ? '已满' : `💰 ${item.price}`;
     const priceText = this.add.text(w / 2 - 12, h / 2 - 22, priceStr, {
       fontSize: '14px',
+      fontFamily: 'monospace',
       fill: priceColor,
       fontStyle: 'bold',
     }).setOrigin(1, 0.5);
