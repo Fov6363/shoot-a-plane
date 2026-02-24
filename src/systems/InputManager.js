@@ -61,9 +61,15 @@ export class InputManager {
   }
 
   /**
-   * 检查触摸是否在技能按钮上
+   * 检查触摸是否在技能按钮上或升级UI区域
    */
   _isOnSkillButton(pointer) {
+    // 升级 UI 激活时，底部 22% 区域不触发移动
+    if (this.scene.upgradeUIActive) {
+      const { height } = this.scene.cameras.main;
+      if (pointer.y > height * 0.78) return true;
+    }
+
     for (const btn of this._skillButtons) {
       if (!btn || !btn.circle.visible) continue;
       const dist = Phaser.Math.Distance.Between(

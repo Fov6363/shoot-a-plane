@@ -78,11 +78,15 @@ export interface ColorConfig {
   BOSS: number;
 }
 
+export type BuildPath = 'barrage' | 'burst' | 'survival' | 'general';
+
 export interface UpgradeConfig {
   id: string;
   name: string;
   description: string;
   type: 'stat' | 'weapon' | 'skill';
+  buildPath?: BuildPath;
+  desktopOnly?: boolean;
   repeatable: boolean;
   maxLevel: number;
   value?: number;

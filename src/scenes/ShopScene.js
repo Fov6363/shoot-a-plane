@@ -1,6 +1,7 @@
 // src/scenes/ShopScene.js
 
 import { SHOP_ITEMS, SHOP_CATEGORIES, getShopItemsForDisplay } from '../config/shopItems.js';
+import { BUILD_PATH_COLORS, BUILD_PATH_NAMES } from '../config/upgrades.js';
 import { GAME_CONFIG } from '../config/gameConfig.ts';
 
 export class ShopScene extends Phaser.Scene {
@@ -147,6 +148,19 @@ export class ShopScene extends Phaser.Scene {
     const cardBg = this.add.rectangle(0, 0, w, h, bgColor, bgAlpha);
     cardBg.setStrokeStyle(2, strokeColor);
 
+    // Build 路线色条（左侧 4px）
+    const buildColor = item.buildPath ? (BUILD_PATH_COLORS[item.buildPath] || 0x4488ff) : 0x4488ff;
+    const buildStrip = this.add.rectangle(-w / 2 + 2, 0, 4, h - 4, buildColor);
+    buildStrip.setOrigin(0, 0.5);
+    if (soldOut) buildStrip.setAlpha(0.3);
+
+    // Build 路线小标签（右上角）
+    const buildName = item.buildPath ? (BUILD_PATH_NAMES[item.buildPath] || '通用') : '通用';
+    const buildLabel = this.add.text(w / 2 - 8, -h / 2 + 8, buildName, {
+      fontSize: '10px',
+      fill: soldOut ? '#444444' : ('#' + buildColor.toString(16).padStart(6, '0')),
+    }).setOrigin(1, 0);
+
     // 商品名称
     const nameColor = soldOut ? '#666666' : '#ffffff';
     const nameText = this.add.text(0, -h / 2 + 18, item.name, {
@@ -182,7 +196,7 @@ export class ShopScene extends Phaser.Scene {
       fontStyle: 'bold',
     }).setOrigin(1, 0.5);
 
-    container.add([cardBg, nameText, descText, catText, priceText]);
+    container.add([cardBg, buildStrip, buildLabel, nameText, descText, catText, priceText]);
 
     // 交互
     if (!soldOut && canAfford) {

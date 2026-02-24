@@ -1,5 +1,26 @@
 // src/config/upgrades.js
 
+export const BUILD_PATHS = {
+  BARRAGE: 'barrage',
+  BURST: 'burst',
+  SURVIVAL: 'survival',
+  GENERAL: 'general',
+};
+
+export const BUILD_PATH_COLORS = {
+  [BUILD_PATHS.BARRAGE]: 0xff9900,
+  [BUILD_PATHS.BURST]: 0xff4444,
+  [BUILD_PATHS.SURVIVAL]: 0x44ff88,
+  [BUILD_PATHS.GENERAL]: 0x4488ff,
+};
+
+export const BUILD_PATH_NAMES = {
+  [BUILD_PATHS.BARRAGE]: '弹幕',
+  [BUILD_PATHS.BURST]: '暴击',
+  [BUILD_PATHS.SURVIVAL]: '生存',
+  [BUILD_PATHS.GENERAL]: '通用',
+};
+
 export const UPGRADE_TYPES = {
   // 属性类
   DAMAGE: 'damage',
@@ -33,6 +54,7 @@ export const UPGRADES = {
     name: '攻击力提升',
     description: '所有武器伤害 +15%',
     type: 'stat',
+    buildPath: BUILD_PATHS.BURST,
     repeatable: true,
     maxLevel: 8,
     value: 0.15, // +15%
@@ -46,6 +68,7 @@ export const UPGRADES = {
     name: '射速提升',
     description: '射击冷却时间 -20%',
     type: 'stat',
+    buildPath: BUILD_PATHS.BARRAGE,
     repeatable: true,
     maxLevel: 6,
     value: 0.2,
@@ -59,6 +82,7 @@ export const UPGRADES = {
     name: '移动速度提升',
     description: '飞机移速 +10%',
     type: 'stat',
+    buildPath: BUILD_PATHS.GENERAL,
     repeatable: true,
     maxLevel: 8,
     value: 0.1,
@@ -72,6 +96,7 @@ export const UPGRADES = {
     name: '生命值提升',
     description: '最大HP +1',
     type: 'stat',
+    buildPath: BUILD_PATHS.SURVIVAL,
     repeatable: true,
     maxLevel: 5,
     value: 1,
@@ -86,6 +111,7 @@ export const UPGRADES = {
     name: '子弹速度提升',
     description: '子弹飞行速度 +20%',
     type: 'stat',
+    buildPath: BUILD_PATHS.BARRAGE,
     repeatable: true,
     maxLevel: 5,
     value: 0.2,
@@ -99,6 +125,7 @@ export const UPGRADES = {
     name: '经验倍率提升',
     description: '获得经验值 +25%',
     type: 'stat',
+    buildPath: BUILD_PATHS.GENERAL,
     repeatable: true,
     maxLevel: 4,
     value: 0.25,
@@ -113,6 +140,7 @@ export const UPGRADES = {
     name: '多重射击',
     description: '每级增加2颗子弹，最终形成扇形弹幕',
     type: 'weapon',
+    buildPath: BUILD_PATHS.BARRAGE,
     repeatable: true,
     maxLevel: 10,
     apply: (player, level) => {
@@ -178,6 +206,7 @@ export const UPGRADES = {
     name: '护盾',
     description: '抵挡1次伤害后恢复（冷却30秒）',
     type: 'skill',
+    buildPath: BUILD_PATHS.SURVIVAL,
     repeatable: false,
     maxLevel: 1,
     apply: (player, level) => {
@@ -204,6 +233,8 @@ export const UPGRADES = {
     name: '子弹时间',
     description: '按住Shift减缓时间流速',
     type: 'skill',
+    buildPath: BUILD_PATHS.GENERAL,
+    desktopOnly: true,
     repeatable: false,
     maxLevel: 1,
     apply: (player, level) => {
@@ -216,6 +247,7 @@ export const UPGRADES = {
     name: '吸血',
     description: '击杀敌人有10%概率恢复1 HP',
     type: 'skill',
+    buildPath: BUILD_PATHS.SURVIVAL,
     repeatable: false,
     maxLevel: 1,
     apply: (player, level) => {
@@ -228,6 +260,7 @@ export const UPGRADES = {
     name: '穿透子弹',
     description: '子弹可穿透敌人',
     type: 'skill',
+    buildPath: BUILD_PATHS.BARRAGE,
     repeatable: false,
     maxLevel: 1,
     apply: (player, level) => {
@@ -240,6 +273,7 @@ export const UPGRADES = {
     name: '暴击',
     description: '15%概率造成双倍伤害',
     type: 'skill',
+    buildPath: BUILD_PATHS.BURST,
     repeatable: false,
     maxLevel: 1,
     apply: (player, level) => {
@@ -252,6 +286,7 @@ export const UPGRADES = {
     name: '连击增伤',
     description: '连续击中同一目标，每次伤害+1%（可叠加）',
     type: 'skill',
+    buildPath: BUILD_PATHS.BURST,
     repeatable: true,
     maxLevel: 10,
     apply: (player, level) => {
@@ -264,12 +299,16 @@ export const UPGRADES = {
 /**
  * 获取所有可用的升级选项
  */
-export function getAvailableUpgrades(playerUpgrades = {}) {
+export function getAvailableUpgrades(playerUpgrades = {}, options = {}) {
   const available = [];
+  const { isTouchDevice } = options;
 
   for (const upgradeId in UPGRADES) {
     const upgrade = UPGRADES[upgradeId];
     const currentLevel = playerUpgrades[upgradeId] || 0;
+
+    // 触屏设备跳过桌面端专属升级
+    if (isTouchDevice && upgrade.desktopOnly) continue;
 
     // 检查是否还能继续升级
     if (currentLevel < upgrade.maxLevel) {
@@ -287,8 +326,8 @@ export function getAvailableUpgrades(playerUpgrades = {}) {
 /**
  * 随机选择N个升级选项
  */
-export function getRandomUpgrades(playerUpgrades = {}, count = 3) {
-  const available = getAvailableUpgrades(playerUpgrades);
+export function getRandomUpgrades(playerUpgrades = {}, count = 3, options = {}) {
+  const available = getAvailableUpgrades(playerUpgrades, options);
 
   if (available.length === 0) {
     return [];

@@ -10,33 +10,28 @@ export class UpgradeSystem {
     // 玩家已获得的升级及等级
     this.playerUpgrades = {};
 
-    // 监听升级事件
+    // 触屏检测
+    this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    // 监听升级事件（GameScene.setupEvents 会接管这些事件）
     scene.events.on('level-up', this.onLevelUp, this);
     scene.events.on('upgrade-selected', this.applyUpgrade, this);
   }
 
   /**
-   * 玩家升级时触发
+   * 玩家升级时触发（会被 GameScene 接管）
    */
   onLevelUp(level) {
-    // 暂停游戏
-    this.scene.scene.pause('GameScene');
-
-    // 获取3个随机升级选项
-    const options = this.getUpgradeOptions(3);
-
-    // 启动升级选择场景并置顶（UpgradeScene 注册顺序在 GameScene 之前，需要手动提升）
-    this.scene.scene.launch('UpgradeScene', {
-      options: options
-    });
-    this.scene.scene.bringToTop('UpgradeScene');
+    // 此方法已被 GameScene.setupEvents 覆盖，保留为空壳
   }
 
   /**
    * 获取升级选项
    */
   getUpgradeOptions(count = 3) {
-    return getRandomUpgrades(this.playerUpgrades, count);
+    return getRandomUpgrades(this.playerUpgrades, count, {
+      isTouchDevice: this.isTouchDevice,
+    });
   }
 
   /**
@@ -75,10 +70,6 @@ export class UpgradeSystem {
       upgrade,
       level: currentLevel
     });
-
-    // 关闭升级场景，恢复游戏
-    this.scene.scene.stop('UpgradeScene');
-    this.scene.scene.resume('GameScene');
   }
 
   /**

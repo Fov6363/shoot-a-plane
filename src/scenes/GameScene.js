@@ -9,6 +9,7 @@ import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { BossManager } from '../systems/BossManager.js';
 import { GoldSystem } from '../systems/GoldSystem.js';
 import { GAME_CONFIG } from '../config/gameConfig.ts';
+import { BUILD_PATH_COLORS, BUILD_PATH_NAMES } from '../config/upgrades.js';
 import { StorageManager } from '../utils/storage.js';
 import { NeonBackground } from '../utils/neonBackground.js';
 
@@ -53,6 +54,16 @@ export class GameScene extends Phaser.Scene {
     // 叠加场景事件队列
     this.isOverlayActive = false;
     this.pendingEvents = []; // { type: 'upgrade'|'shop', data }
+
+    // 内联升级 UI 状态
+    this.upgradeUIActive = false;
+    this.upgradeUIContainer = null;
+    this.upgradeAutoSelectDuration = 3000; // 3秒自动选择
+    this.upgradeAutoSelectElapsed = 0;
+    this.upgradeDefaultIndex = 0;
+    this.currentUpgradeOptions = [];
+    this.upgradeCountdownGraphics = null;
+    this._upgradeKeyListeners = [];
 
     // 无人机计时器
     this.droneTimer = 0;
@@ -209,19 +220,28 @@ export class GameScene extends Phaser.Scene {
       this.pendingEvents.push({ type: 'upgrade', data: level });
       return;
     }
-    this.openUpgradeScene(level);
+    this.showInlineUpgradeUI(level);
   }
 
   /**
-   * 打开升级场景
+   * 显示内联升级卡片 UI（不暂停游戏）
    */
-  openUpgradeScene(level) {
+  showInlineUpgradeUI(level) {
     this.isOverlayActive = true;
-    this.scene.pause('GameScene');
 
     const options = this.upgradeSystem.getUpgradeOptions(3);
-    this.scene.launch('UpgradeScene', { options });
-    this.scene.bringToTop('UpgradeScene');
+    if (options.length === 0) {
+      this.isOverlayActive = false;
+      this.processNextPendingEvent();
+      return;
+    }
+
+    this.currentUpgradeOptions = options;
+    this.upgradeUIActive = true;
+    this.upgradeAutoSelectElapsed = 0;
+    this.upgradeDefaultIndex = 0;
+
+    this.createUpgradeCards(options);
   }
 
   /**
@@ -229,8 +249,6 @@ export class GameScene extends Phaser.Scene {
    */
   onUpgradeSelected(upgradeId) {
     this.upgradeSystem.applyUpgrade(upgradeId);
-    // UpgradeSystem.applyUpgrade 会 stop UpgradeScene 和 resume GameScene
-    // 但我们需要管理 isOverlayActive
     this.isOverlayActive = false;
 
     // 处理队列中下一个事件
@@ -292,7 +310,7 @@ export class GameScene extends Phaser.Scene {
     // 延迟一帧处理，避免同帧冲突
     this.time.delayedCall(100, () => {
       if (next.type === 'upgrade') {
-        this.openUpgradeScene(next.data);
+        this.showInlineUpgradeUI(next.data);
       } else if (next.type === 'shop') {
         this.openShopScene();
       }
@@ -1291,6 +1309,359 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  // ===== 内联升级 UI =====
+
+  /**
+   * 构建底部升级卡片容器
+   */
+  createUpgradeCards(options) {
+    const { width, height } = this.cameras.main;
+
+    // 创建容器，depth 设高以覆盖游戏元素
+    this.upgradeUIContainer = this.add.container(0, 0);
+    this.upgradeUIContainer.setDepth(2000);
+
+    // 底部 22% 半透明背景
+    const bgH = Math.round(height * 0.22);
+    const bgY = height - bgH;
+    const bg = this.add.rectangle(width / 2, bgY + bgH / 2, width, bgH, 0x000000, 0.7);
+    this.upgradeUIContainer.add(bg);
+
+    // 卡片尺寸
+    const cardCount = options.length;
+    const spacing = 8;
+    const cardW = Math.min(Math.round((width - spacing * (cardCount + 1)) / cardCount), 200);
+    const cardH = Math.round(bgH - 20);
+    const totalW = cardCount * cardW + (cardCount - 1) * spacing;
+    const startX = (width - totalW) / 2 + cardW / 2;
+    const cardY = bgY + bgH / 2;
+
+    this._upgradeCards = [];
+
+    options.forEach((upgrade, index) => {
+      const x = startX + (cardW + spacing) * index;
+      const card = this.createSingleUpgradeCard(x, cardY, cardW, cardH, upgrade, index);
+      this._upgradeCards.push(card);
+    });
+
+    // 默认高亮第一张
+    this.highlightUpgradeCard(0);
+
+    // 创建倒计时圆环（在第一张卡片上）
+    this.createCountdownRing(this._upgradeCards[0]);
+
+    // 刷新按钮
+    this.createInlineRerollButton(bgY);
+
+    // 桌面端键盘快捷键
+    this._upgradeKeyListeners = [];
+    if (!this.isTouchDevice) {
+      options.forEach((upgrade, index) => {
+        const handler = () => {
+          this.selectInlineUpgrade(index);
+        };
+        this.input.keyboard.on(`keydown-${index + 1}`, handler);
+        this._upgradeKeyListeners.push({ event: `keydown-${index + 1}`, fn: handler });
+      });
+    }
+
+    // 滑入动画（从底部弹出）
+    this.upgradeUIContainer.y = bgH;
+    this.tweens.add({
+      targets: this.upgradeUIContainer,
+      y: 0,
+      duration: 300,
+      ease: 'Back.easeOut',
+    });
+  }
+
+  /**
+   * 创建单张升级卡片
+   */
+  createSingleUpgradeCard(x, y, w, h, upgrade, index) {
+    const container = this.add.container(x, y);
+
+    // 卡片背景
+    const bg = this.add.rectangle(0, 0, w, h, 0x1a1a2e, 0.9);
+    bg.setStrokeStyle(2, 0x555555);
+
+    // 左侧 4px Build 路线色条
+    const buildColor = upgrade.buildPath ? (BUILD_PATH_COLORS[upgrade.buildPath] || 0x4488ff) : 0x4488ff;
+    const strip = this.add.rectangle(-w / 2 + 2, 0, 4, h - 4, buildColor);
+    strip.setOrigin(0, 0.5);
+
+    // 右上角路线标签
+    const buildName = upgrade.buildPath ? (BUILD_PATH_NAMES[upgrade.buildPath] || '通用') : '通用';
+    const buildLabel = this.add.text(w / 2 - 6, -h / 2 + 6, buildName, {
+      fontSize: '10px',
+      fill: '#' + buildColor.toString(16).padStart(6, '0'),
+    }).setOrigin(1, 0);
+
+    // 名称
+    const nameText = this.add.text(0, -h / 2 + 22, upgrade.name, {
+      fontSize: '14px',
+      fill: '#ffffff',
+      fontStyle: 'bold',
+      align: 'center',
+      wordWrap: { width: w - 20 },
+    }).setOrigin(0.5);
+
+    // 描述
+    const descText = this.add.text(0, 4, upgrade.description, {
+      fontSize: '11px',
+      fill: '#cccccc',
+      align: 'center',
+      wordWrap: { width: w - 16 },
+    }).setOrigin(0.5);
+
+    // 等级
+    const levelStr = upgrade.currentLevel > 0 ? `Lv.${upgrade.currentLevel}` : '';
+    const levelText = this.add.text(0, h / 2 - 16, levelStr, {
+      fontSize: '11px',
+      fill: '#ffff00',
+    }).setOrigin(0.5);
+
+    // 键盘提示
+    const keyHint = this.add.text(w / 2 - 6, h / 2 - 6, `[${index + 1}]`, {
+      fontSize: '12px',
+      fill: '#00ff00',
+    }).setOrigin(1, 1);
+    if (this.isTouchDevice) keyHint.setVisible(false);
+
+    container.add([bg, strip, buildLabel, nameText, descText, levelText, keyHint]);
+
+    // 点击交互
+    bg.setInteractive({ useHandCursor: true });
+    bg.on('pointerdown', () => {
+      this.selectInlineUpgrade(index);
+    });
+
+    this.upgradeUIContainer.add(container);
+
+    return { container, bg, index };
+  }
+
+  /**
+   * 高亮选中的升级卡片
+   */
+  highlightUpgradeCard(index) {
+    this.upgradeDefaultIndex = index;
+    if (!this._upgradeCards) return;
+
+    this._upgradeCards.forEach((card, i) => {
+      if (i === index) {
+        card.bg.setStrokeStyle(3, 0x00ff00);
+        card.bg.setFillStyle(0x1a2a1a, 0.95);
+      } else {
+        card.bg.setStrokeStyle(2, 0x555555);
+        card.bg.setFillStyle(0x1a1a2e, 0.9);
+      }
+    });
+  }
+
+  /**
+   * 创建倒计时圆环
+   */
+  createCountdownRing(card) {
+    if (!card) return;
+    const cx = card.container.x;
+    const cy = card.container.y - 50;
+
+    this.upgradeCountdownGraphics = this.add.graphics();
+    this.upgradeCountdownGraphics.setDepth(2001);
+
+    this.upgradeCountdownText = this.add.text(cx, cy, '3', {
+      fontSize: '16px',
+      fill: '#00ff00',
+      fontStyle: 'bold',
+    }).setOrigin(0.5).setDepth(2001);
+  }
+
+  /**
+   * 更新倒计时圆环
+   */
+  updateCountdownRing(progress) {
+    if (!this.upgradeCountdownGraphics || !this._upgradeCards || !this._upgradeCards[this.upgradeDefaultIndex]) return;
+
+    const card = this._upgradeCards[this.upgradeDefaultIndex];
+    const cx = card.container.x;
+    const cy = card.container.y - 50;
+    const radius = 14;
+
+    this.upgradeCountdownGraphics.clear();
+
+    // 背景圆
+    this.upgradeCountdownGraphics.lineStyle(3, 0x333333, 0.5);
+    this.upgradeCountdownGraphics.strokeCircle(cx, cy, radius);
+
+    // 进度弧
+    const startAngle = -Math.PI / 2;
+    const endAngle = startAngle + Math.PI * 2 * progress;
+    this.upgradeCountdownGraphics.lineStyle(3, 0x00ff00, 1);
+    this.upgradeCountdownGraphics.beginPath();
+    this.upgradeCountdownGraphics.arc(cx, cy, radius, startAngle, endAngle);
+    this.upgradeCountdownGraphics.strokePath();
+
+    // 更新秒数文字
+    const remaining = Math.ceil((this.upgradeAutoSelectDuration - this.upgradeAutoSelectElapsed) / 1000);
+    if (this.upgradeCountdownText) {
+      this.upgradeCountdownText.setPosition(cx, cy);
+      this.upgradeCountdownText.setText(`${remaining}`);
+    }
+  }
+
+  /**
+   * 选择升级（点击或自动）
+   */
+  selectInlineUpgrade(index) {
+    if (!this.upgradeUIActive) return;
+    this.upgradeUIActive = false;
+
+    const upgrade = this.currentUpgradeOptions[index];
+    if (!upgrade) return;
+
+    // 移除键盘监听
+    this._upgradeKeyListeners.forEach(({ event, fn }) => {
+      this.input.keyboard.off(event, fn);
+    });
+    this._upgradeKeyListeners = [];
+    if (this._rerollKeyHandler) {
+      this.input.keyboard.off('keydown-R', this._rerollKeyHandler);
+      this._rerollKeyHandler = null;
+    }
+
+    // 滑出动画
+    const { height } = this.cameras.main;
+    const bgH = Math.round(height * 0.22);
+    this.tweens.add({
+      targets: this.upgradeUIContainer,
+      y: bgH + 20,
+      duration: 200,
+      ease: 'Power2',
+      onComplete: () => {
+        this.cleanupUpgradeUI();
+        this.events.emit('upgrade-selected', upgrade.id);
+      },
+    });
+  }
+
+  /**
+   * 清理升级 UI
+   */
+  cleanupUpgradeUI() {
+    if (this.upgradeUIContainer) {
+      this.upgradeUIContainer.destroy(true);
+      this.upgradeUIContainer = null;
+    }
+    if (this.upgradeCountdownGraphics) {
+      this.upgradeCountdownGraphics.destroy();
+      this.upgradeCountdownGraphics = null;
+    }
+    if (this.upgradeCountdownText) {
+      this.upgradeCountdownText.destroy();
+      this.upgradeCountdownText = null;
+    }
+    this._upgradeCards = null;
+    this.currentUpgradeOptions = [];
+
+    // 移除键盘监听
+    this._upgradeKeyListeners.forEach(({ event, fn }) => {
+      this.input.keyboard.off(event, fn);
+    });
+    this._upgradeKeyListeners = [];
+    if (this._rerollKeyHandler) {
+      this.input.keyboard.off('keydown-R', this._rerollKeyHandler);
+      this._rerollKeyHandler = null;
+    }
+  }
+
+  /**
+   * 创建内联刷新按钮
+   */
+  createInlineRerollButton(bgY) {
+    const tokens = this.player.rerollTokens || 0;
+    if (tokens <= 0) return;
+
+    const { width } = this.cameras.main;
+    const btnW = 140;
+    const btnH = 30;
+    const btnX = width / 2;
+    const btnY = bgY - 20;
+
+    const btnBg = this.add.rectangle(btnX, btnY, btnW, btnH, 0x224422, 0.9);
+    btnBg.setStrokeStyle(2, 0x44ff44);
+    btnBg.setInteractive({ useHandCursor: true });
+
+    const btnText = this.add.text(btnX, btnY, `刷新 (${tokens})`, {
+      fontSize: '14px',
+      fill: '#44ff44',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    btnBg.on('pointerover', () => btnBg.setFillStyle(0x336633, 0.9));
+    btnBg.on('pointerout', () => btnBg.setFillStyle(0x224422, 0.9));
+    btnBg.on('pointerdown', () => this.doInlineReroll());
+
+    this.upgradeUIContainer.add([btnBg, btnText]);
+    this._rerollBtnBg = btnBg;
+    this._rerollBtnText = btnText;
+
+    // R 键刷新（桌面端）
+    if (!this.isTouchDevice) {
+      this._rerollKeyHandler = () => this.doInlineReroll();
+      this.input.keyboard.on('keydown-R', this._rerollKeyHandler);
+    }
+  }
+
+  /**
+   * 执行内联刷新
+   */
+  doInlineReroll() {
+    if (!this.upgradeUIActive) return;
+    if (!this.player.rerollTokens || this.player.rerollTokens <= 0) return;
+
+    this.player.rerollTokens--;
+
+    // 清理当前 UI（但不清理 container 本身）
+    // 移除键盘监听
+    this._upgradeKeyListeners.forEach(({ event, fn }) => {
+      this.input.keyboard.off(event, fn);
+    });
+    this._upgradeKeyListeners = [];
+    if (this._rerollKeyHandler) {
+      this.input.keyboard.off('keydown-R', this._rerollKeyHandler);
+      this._rerollKeyHandler = null;
+    }
+
+    // 销毁旧 UI
+    this.cleanupUpgradeUI();
+
+    // 重新获取选项并重建
+    this.upgradeUIActive = true;
+    const newOptions = this.upgradeSystem.getUpgradeOptions(3);
+    this.currentUpgradeOptions = newOptions;
+    this.upgradeAutoSelectElapsed = 0;
+    this.upgradeDefaultIndex = 0;
+
+    this.createUpgradeCards(newOptions);
+  }
+
+  /**
+   * 更新内联升级 UI 倒计时
+   */
+  updateInlineUpgradeUI(delta) {
+    if (!this.upgradeUIActive) return;
+
+    this.upgradeAutoSelectElapsed += delta;
+    const progress = Math.min(this.upgradeAutoSelectElapsed / this.upgradeAutoSelectDuration, 1);
+    this.updateCountdownRing(progress);
+
+    // 3 秒到自动选择默认项
+    if (this.upgradeAutoSelectElapsed >= this.upgradeAutoSelectDuration) {
+      this.selectInlineUpgrade(this.upgradeDefaultIndex);
+    }
+  }
+
   /**
    * 更新连击显示
    */
@@ -1405,5 +1776,8 @@ export class GameScene extends Phaser.Scene {
 
     // 更新UI
     this.updateUI();
+
+    // 更新内联升级 UI 倒计时
+    this.updateInlineUpgradeUI(delta);
   }
 }

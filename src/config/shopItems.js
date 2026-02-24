@@ -1,5 +1,7 @@
 // src/config/shopItems.js
 
+import { BUILD_PATHS } from './upgrades.js';
+
 export const SHOP_CATEGORIES = {
   CONSUMABLE: 'consumable',
   PASSIVE: 'passive',
@@ -13,6 +15,7 @@ export const SHOP_ITEMS = {
     name: '维修套件',
     description: '立即恢复 2 点 HP',
     category: SHOP_CATEGORIES.CONSUMABLE,
+    buildPath: BUILD_PATHS.GENERAL,
     price: 80,
     maxStack: Infinity,
     hideWhenFull: true, // 满血时隐藏
@@ -29,6 +32,7 @@ export const SHOP_ITEMS = {
     name: '完全维修',
     description: '恢复全部 HP',
     category: SHOP_CATEGORIES.CONSUMABLE,
+    buildPath: BUILD_PATHS.GENERAL,
     price: 200,
     maxStack: Infinity,
     hideWhenFull: true,
@@ -45,6 +49,7 @@ export const SHOP_ITEMS = {
     name: '全屏炸弹',
     description: '按 B 使用，清除全部小怪',
     category: SHOP_CATEGORIES.CONSUMABLE,
+    buildPath: BUILD_PATHS.GENERAL,
     price: 150,
     maxStack: 3,
     apply: (player, scene) => {
@@ -60,6 +65,7 @@ export const SHOP_ITEMS = {
     name: '刷新令牌',
     description: '升级选择时可刷新选项',
     category: SHOP_CATEGORIES.CONSUMABLE,
+    buildPath: BUILD_PATHS.GENERAL,
     price: 60,
     maxStack: 2,
     apply: (player, scene) => {
@@ -76,6 +82,7 @@ export const SHOP_ITEMS = {
     name: '金币磁铁',
     description: '击杀金币 +30%',
     category: SHOP_CATEGORIES.PASSIVE,
+    buildPath: BUILD_PATHS.GENERAL,
     price: 120,
     maxStack: 1,
     apply: (player, scene) => {
@@ -94,6 +101,7 @@ export const SHOP_ITEMS = {
     name: '幸运金币',
     description: '+10% 概率获得双倍金币',
     category: SHOP_CATEGORIES.PASSIVE,
+    buildPath: BUILD_PATHS.GENERAL,
     price: 100,
     maxStack: 3,
     apply: (player, scene) => {
@@ -112,6 +120,7 @@ export const SHOP_ITEMS = {
     name: '装甲板',
     description: '+20% 概率免疫伤害',
     category: SHOP_CATEGORIES.PASSIVE,
+    buildPath: BUILD_PATHS.SURVIVAL,
     price: 180,
     maxStack: 3,
     apply: (player, scene) => {
@@ -128,6 +137,7 @@ export const SHOP_ITEMS = {
     name: '反击力场',
     description: '受伤时对周围敌人造成 50 伤害',
     category: SHOP_CATEGORIES.PASSIVE,
+    buildPath: BUILD_PATHS.SURVIVAL,
     price: 200,
     maxStack: 1,
     apply: (player, scene) => {
@@ -143,6 +153,7 @@ export const SHOP_ITEMS = {
     name: '闪电链',
     description: '击杀时闪电跳到最近敌人，造成其 50% HP 伤害',
     category: SHOP_CATEGORIES.PASSIVE,
+    buildPath: BUILD_PATHS.BURST,
     price: 200,
     maxStack: 1,
     apply: (player, scene) => {
@@ -158,6 +169,7 @@ export const SHOP_ITEMS = {
     name: '环绕无人机',
     description: '每 2 秒自动对周围敌人造成 10 伤害',
     category: SHOP_CATEGORIES.PASSIVE,
+    buildPath: BUILD_PATHS.GENERAL,
     price: 280,
     maxStack: 1,
     apply: (player, scene) => {
@@ -174,6 +186,7 @@ export const SHOP_ITEMS = {
     name: '过载脉冲',
     description: '按 Q: 3 秒内射速 x3，CD 20 秒',
     category: SHOP_CATEGORIES.ACTIVE,
+    buildPath: BUILD_PATHS.GENERAL,
     price: 150,
     maxStack: 1,
     apply: (player, scene) => {
@@ -191,6 +204,7 @@ export const SHOP_ITEMS = {
     name: '时间锚点',
     description: '按 E: 标记位置和 HP，5 秒后传送回来并恢复',
     category: SHOP_CATEGORIES.ACTIVE,
+    buildPath: BUILD_PATHS.GENERAL,
     price: 200,
     maxStack: 1,
     apply: (player, scene) => {
