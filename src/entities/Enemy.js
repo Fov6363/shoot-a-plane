@@ -29,12 +29,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
    * 受伤
    */
   takeDamage(amount) {
+    if (!this.active || !this.scene) return false;
+
     this.hp -= amount;
 
     // 受伤闪烁
     this.setTint(0xff0000);
     this.scene.time.delayedCall(100, () => {
-      this.clearTint();
+      if (this.active) this.clearTint();
     });
 
     if (this.hp <= 0) {
@@ -48,6 +50,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
    * 死亡处理
    */
   onDeath() {
+    if (!this.active || !this.scene) return;
+
     // 掉落经验球
     this.scene.events.emit('enemy-killed', {
       x: this.x,
@@ -67,6 +71,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
    * 创建死亡特效
    */
   createDeathEffect() {
+    if (!this.scene) return;
+
     const particles = this.scene.add.particles(this.x, this.y, 'enemy', {
       speed: { min: 50, max: 150 },
       scale: { start: 0.5, end: 0 },
@@ -110,7 +116,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 export class ShooterEnemy extends Enemy {
   constructor(scene, x, y) {
     super(scene, x, y, 'SHOOTER');
-    this.lastShot = 0;
+    this.lastShot = scene.time.now;
     this.shootInterval = 2000; // 2秒射击一次
   }
 

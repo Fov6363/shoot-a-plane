@@ -65,8 +65,8 @@ export class MenuScene extends Phaser.Scene {
       : [
           '操作说明:',
           'WASD / 方向键 - 移动',
-          '空格 - 射击',
-          '鼠标移动 - 跟随控制'
+          '鼠标移动 - 跟随控制',
+          '自动射击 | B-炸弹 Q-过载 E-锚点'
         ];
 
     controls.forEach((text, i) => {

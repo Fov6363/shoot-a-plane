@@ -667,24 +667,30 @@ export class GameScene extends Phaser.Scene {
    * 子弹击中敌人
    */
   onBulletHitEnemy(bullet, enemy) {
-    if (!bullet.active || !enemy.active) return;
+    if (!bullet.active || !enemy.active || !enemy.scene) return;
 
-    // 禁用子弹
-    if (bullet.hit) {
-      bullet.hit();
-    } else {
-      bullet.setActive(false);
-      bullet.setVisible(false);
-      if (bullet.body) bullet.disableBody();
+    // 穿透子弹不销毁，否则正常销毁
+    if (!this.player.hasPierce) {
+      if (bullet.hit) {
+        bullet.hit();
+      } else {
+        bullet.setActive(false);
+        bullet.setVisible(false);
+        if (bullet.body) bullet.disableBody();
+      }
     }
 
     // 检查敌人是否有 takeDamage 方法
     if (enemy.takeDamage) {
-      // 计算连击伤害
+      // 计算连击伤害（含暴击判定）
       const finalDamage = this.player.onHitTarget(enemy);
 
-      // 显示伤害数字
-      this.showDamageNumber(enemy.x, enemy.y, Math.floor(finalDamage));
+      // 显示伤害数字（暴击用红色大号）
+      if (this.player._lastHitCrit) {
+        this.showCritDamageNumber(enemy.x, enemy.y, Math.floor(finalDamage));
+      } else {
+        this.showDamageNumber(enemy.x, enemy.y, Math.floor(finalDamage));
+      }
 
       // 更新连击显示
       this.updateComboDisplay();
@@ -702,20 +708,38 @@ export class GameScene extends Phaser.Scene {
    * 子弹击中BOSS
    */
   onBulletHitBoss(bullet, boss) {
-    if (!bullet.active || !boss.active) return;
+    if (!bullet.active || !boss.active || !boss.scene) return;
 
-    // 禁用子弹
-    if (bullet.hit) {
-      bullet.hit();
-    } else {
-      bullet.setActive(false);
-      bullet.setVisible(false);
-      if (bullet.body) bullet.disableBody();
+    // 穿透子弹不销毁
+    if (!this.player.hasPierce) {
+      if (bullet.hit) {
+        bullet.hit();
+      } else {
+        bullet.setActive(false);
+        bullet.setVisible(false);
+        if (bullet.body) bullet.disableBody();
+      }
     }
 
-    // 计算连击伤害
+    // 计算连击伤害（含暴击判定）
     const finalDamage = this.player.onHitTarget(boss);
-    boss.takeDamage(finalDamage);
+
+    // 显示伤害数字
+    if (this.player._lastHitCrit) {
+      this.showCritDamageNumber(boss.x, boss.y, Math.floor(finalDamage));
+    } else {
+      this.showDamageNumber(boss.x, boss.y, Math.floor(finalDamage));
+    }
+
+    // 更新连击显示
+    this.updateComboDisplay();
+
+    const killed = boss.takeDamage(finalDamage);
+
+    // 吸血效果
+    if (killed && this.player.hasLifesteal && Math.random() < 0.1) {
+      this.player.heal(1);
+    }
   }
 
   /**
@@ -813,11 +837,13 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
-    // 短暂时间冻结（50ms 的 slowmo 感）
-    this.time.timeScale = 0.3;
-    this.time.delayedCall(80, () => {
-      this.time.timeScale = 1;
-    });
+    // 短暂时间冻结（50ms 的 slowmo 感）- 防止叠加
+    if (this.time.timeScale === 1) {
+      this.time.timeScale = 0.3;
+      this.time.delayedCall(80, () => {
+        this.time.timeScale = 1;
+      });
+    }
   }
 
   /**
@@ -946,15 +972,12 @@ export class GameScene extends Phaser.Scene {
 
     p.overchargeReady = false;
     p.overchargeActive = true;
-    p.originalFireRate = p.fireRate;
-    p.fireRate = p.fireRate / 3; // 射速 x3
 
     // 视觉提示：玩家变色
     p.setTint(0xff8800);
 
     // 3 秒后恢复
     this.time.delayedCall(3000, () => {
-      p.fireRate = p.originalFireRate;
       p.overchargeActive = false;
       p.clearTint();
 
@@ -1188,6 +1211,31 @@ export class GameScene extends Phaser.Scene {
       y: y - 60,
       alpha: 0,
       duration: 800,
+      ease: 'Power2',
+      onComplete: () => text.destroy()
+    });
+  }
+
+  /**
+   * 显示暴击伤害数字
+   */
+  showCritDamageNumber(x, y, damage) {
+    const text = this.add.text(x, y, `CRIT -${damage}`, {
+      fontSize: '40px',
+      fill: '#ff4444',
+      fontStyle: 'bold',
+      stroke: '#ffff00',
+      strokeThickness: 3
+    }).setOrigin(0.5);
+
+    text.setScale(1.5);
+    this.tweens.add({
+      targets: text,
+      y: y - 80,
+      alpha: 0,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 1000,
       ease: 'Power2',
       onComplete: () => text.destroy()
     });

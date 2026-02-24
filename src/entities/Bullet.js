@@ -32,8 +32,10 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
   preUpdate(time, delta) {
     super.preUpdate(time, delta);
 
-    // 超出屏幕销毁
-    if (this.y < -10 || this.y > this.scene.cameras.main.height + 10) {
+    // 超出屏幕销毁（含左右边界）
+    const cam = this.scene.cameras.main;
+    if (this.y < -10 || this.y > cam.height + 10 ||
+        this.x < -10 || this.x > cam.width + 10) {
       this.deactivate();
     }
   }
@@ -62,6 +64,8 @@ export class BulletGroup extends Phaser.Physics.Arcade.Group {
   constructor(scene, texture, maxSize = 50) {
     super(scene.physics.world, scene);
 
+    this.textureKey = texture;
+
     this.createMultiple({
       classType: Bullet,
       frameQuantity: maxSize,
@@ -78,7 +82,7 @@ export class BulletGroup extends Phaser.Physics.Arcade.Group {
     let bullet = this.getFirstDead(false);
     if (!bullet) {
       // 如果对象池满了，创建新子弹
-      bullet = new Bullet(this.scene, x, y, this.texture.key);
+      bullet = new Bullet(this.scene, x, y, this.textureKey);
       this.add(bullet);
     }
     if (bullet && bullet.fire) {

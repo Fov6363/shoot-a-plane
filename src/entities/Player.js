@@ -37,6 +37,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // 特殊效果标志
     this.hasMagnet = false;
     this.hasLifesteal = false;
+    this.hasPierce = false;
+    this.hasCritical = false;
+    this.hasShield = false;
+    this.shieldActive = false;
+    this.shieldCooldown = 0;
+    this.hasBulletTime = false;
 
     // 连击增伤系统
     this.comboDamageLevel = 0;
@@ -93,7 +99,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    * 射击
    */
   shoot(time) {
-    if (time > this.lastFired + this.fireRate) {
+    const effectiveFireRate = this.overchargeActive ? this.fireRate / 3 : this.fireRate;
+    if (time > this.lastFired + effectiveFireRate) {
       this.lastFired = time;
       return true;
     }
@@ -105,6 +112,29 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    */
   takeDamage(amount = 1) {
     if (this.invincible) return false;
+
+    // 护盾抵挡
+    if (this.hasShield && this.shieldActive) {
+      this.shieldActive = false;
+      this.shieldCooldown = 30000;
+      if (this.scene) {
+        const shieldText = this.scene.add.text(this.x, this.y - 30, 'SHIELD!', {
+          fontSize: '20px',
+          fill: '#00ffff',
+          fontStyle: 'bold',
+          stroke: '#000000',
+          strokeThickness: 2,
+        }).setOrigin(0.5);
+        this.scene.tweens.add({
+          targets: shieldText,
+          y: shieldText.y - 40,
+          alpha: 0,
+          duration: 600,
+          onComplete: () => shieldText.destroy(),
+        });
+      }
+      return false;
+    }
 
     // 装甲板闪避
     if (this.dodgeChance > 0 && Math.random() < this.dodgeChance) {
@@ -214,6 +244,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
+    // 护盾冷却
+    if (this.hasShield && !this.shieldActive && this.shieldCooldown > 0) {
+      this.shieldCooldown -= delta;
+      if (this.shieldCooldown <= 0) {
+        this.shieldCooldown = 0;
+        this.shieldActive = true;
+      }
+    }
+
     // 连击重置计时（2秒未击中则重置）
     if (this.currentCombo > 0) {
       this.comboResetTimer += delta;
@@ -227,22 +266,27 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    * 记录击中目标（用于连击系统）
    */
   onHitTarget(target) {
-    if (!this.comboDamageLevel) return this.damage;
+    let finalDamage = this.damage;
 
-    // 检查是否是同一目标
-    if (this.lastHitTarget === target) {
-      this.currentCombo++;
-    } else {
-      this.currentCombo = 1;
-      this.lastHitTarget = target;
+    // 连击增伤
+    if (this.comboDamageLevel) {
+      if (this.lastHitTarget === target) {
+        this.currentCombo++;
+      } else {
+        this.currentCombo = 1;
+        this.lastHitTarget = target;
+      }
+      this.comboResetTimer = 0;
+      const comboBonus = this.currentCombo * this.comboDamageBonus;
+      finalDamage = this.damage * (1 + comboBonus);
     }
 
-    // 重置计时器
-    this.comboResetTimer = 0;
-
-    // 计算连击伤害
-    const comboBonus = this.currentCombo * this.comboDamageBonus;
-    const finalDamage = this.damage * (1 + comboBonus);
+    // 暴击判定（15% 概率双倍伤害）
+    this._lastHitCrit = false;
+    if (this.hasCritical && Math.random() < 0.15) {
+      finalDamage *= 2;
+      this._lastHitCrit = true;
+    }
 
     return finalDamage;
   }

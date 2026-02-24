@@ -14,7 +14,9 @@ export class EnemySpawner {
 
     // 难度参数
     this.stage = 1;
-    this.difficultyMultiplier = 1.0;
+    this.stageDifficultyMultiplier = 1.0; // 阶段难度
+    this.timeDifficultyMultiplier = 1.0;  // 时间难度
+    this.difficultyMultiplier = 1.0;      // 综合难度
     this.gameTime = 0; // 游戏进行时间（秒）
 
     // 敌人组（从外部传入，确保碰撞检测正确）
@@ -59,8 +61,11 @@ export class EnemySpawner {
     // 每20秒增加一次难度
     const difficultyLevel = Math.floor(this.gameTime / 20);
 
-    // 难度倍率：每20秒增加10%
-    this.difficultyMultiplier = 1 + difficultyLevel * 0.1;
+    // 时间难度倍率：每20秒增加10%
+    this.timeDifficultyMultiplier = 1 + difficultyLevel * 0.1;
+
+    // 综合难度 = 取时间和阶段的较大值
+    this.difficultyMultiplier = Math.max(this.timeDifficultyMultiplier, this.stageDifficultyMultiplier);
 
     // 生成速度：每20秒减少10%间隔（最多减少50%）
     const spawnSpeedUp = Math.min(difficultyLevel * 0.1, 0.5);
@@ -156,12 +161,8 @@ export class EnemySpawner {
   onStageIncrease(newStage) {
     this.stage = newStage;
 
-    // 增加难度
-    this.difficultyMultiplier = 1 + (newStage - 1) * GAME_CONFIG.DIFFICULTY.HP_INCREASE;
-
-    // 减少生成间隔
-    const spawnRateIncrease = (newStage - 1) * GAME_CONFIG.DIFFICULTY.SPAWN_RATE_INCREASE;
-    this.currentSpawnInterval = this.baseSpawnInterval / (1 + spawnRateIncrease);
+    // 阶段难度倍率（不覆盖时间难度，两者取较大值在 updateDifficulty 中处理）
+    this.stageDifficultyMultiplier = 1 + (newStage - 1) * GAME_CONFIG.DIFFICULTY.HP_INCREASE;
 
     // 解锁新敌人类型
     this.unlockEnemyTypes(newStage);

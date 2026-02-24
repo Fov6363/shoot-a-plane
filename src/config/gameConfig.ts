@@ -31,6 +31,13 @@ export const GAME_CONFIG: GameConfig = {
     BASE_HP: 150, // 降低基础血量（初始 DPS ~8，约 20 秒打完）
     HP_PER_STAGE: 100, // 每阶段额外增加的 HP
     BASE_SCORE: 1000,
+    STAGES: [
+      { name: '红色突击者', color: 0xff2200, moveSpeed: 100, shootInterval: 1500, bulletSpeed: 200 },
+      { name: '蓝色风暴',   color: 0x0066ff, moveSpeed: 140, shootInterval: 1200, bulletSpeed: 180 },
+      { name: '绿色猎手',   color: 0x00cc44, moveSpeed: 60,  shootInterval: 1400, bulletSpeed: 220 },
+      { name: '金色堡垒',   color: 0xffaa00, moveSpeed: 50,  shootInterval: 1000, bulletSpeed: 160 },
+      { name: '紫色毁灭者', color: 0xcc00ff, moveSpeed: 160, shootInterval: 1100, bulletSpeed: 240 },
+    ],
   },
 
   // 难度递增

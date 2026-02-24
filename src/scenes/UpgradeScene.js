@@ -51,6 +51,9 @@ export class UpgradeScene extends Phaser.Scene {
     const startX = (width - (cardWidth * 3 + spacing * 2)) / 2;
     const cardY = height / 2 + 20;
 
+    // 存储键盘监听器引用以便精确移除
+    this._keyListeners = [];
+
     this.upgradeOptions.forEach((option, index) => {
       const x = startX + (cardWidth + spacing) * index + cardWidth / 2;
       const y = cardY;
@@ -140,12 +143,30 @@ export class UpgradeScene extends Phaser.Scene {
       this.selectUpgrade(upgrade.id);
     });
 
-    // 键盘快捷键
-    this.input.keyboard.on(`keydown-${index + 1}`, () => {
+    // 键盘快捷键（用 once 自动移除，或存储引用）
+    const keyHandler = () => {
       this.selectUpgrade(upgrade.id);
-    });
+    };
+    this.input.keyboard.on(`keydown-${index + 1}`, keyHandler);
+    this._keyListeners.push({ event: `keydown-${index + 1}`, fn: keyHandler });
 
     this.cardsContainer.add(container);
+  }
+
+  /**
+   * 移除已注册的键盘监听器
+   */
+  removeKeyListeners() {
+    if (this._keyListeners) {
+      this._keyListeners.forEach(({ event, fn }) => {
+        this.input.keyboard.off(event, fn);
+      });
+      this._keyListeners = [];
+    }
+    if (this._rerollHandler) {
+      this.input.keyboard.off('keydown-R', this._rerollHandler);
+      this._rerollHandler = null;
+    }
   }
 
   /**
@@ -186,9 +207,10 @@ export class UpgradeScene extends Phaser.Scene {
     });
 
     // R 键刷新
-    this.input.keyboard.on('keydown-R', () => {
+    this._rerollHandler = () => {
       this.doReroll(player, btnBg);
-    });
+    };
+    this.input.keyboard.on('keydown-R', this._rerollHandler);
 
     this.rerollBtn = btnBg;
   }
@@ -208,7 +230,7 @@ export class UpgradeScene extends Phaser.Scene {
 
     // 清除旧卡片
     this.cardsContainer.removeAll(true);
-    this.input.keyboard.removeAllListeners();
+    this.removeKeyListeners();
 
     // 重建卡片
     this.createUpgradeCards();
@@ -220,9 +242,10 @@ export class UpgradeScene extends Phaser.Scene {
     } else {
       this.rerollText.setText(`🔄 刷新选项 (${player.rerollTokens})`);
       // 重新注册 R 键
-      this.input.keyboard.on('keydown-R', () => {
+      this._rerollHandler = () => {
         this.doReroll(player, btnBg);
-      });
+      };
+      this.input.keyboard.on('keydown-R', this._rerollHandler);
     }
   }
 
@@ -255,7 +278,7 @@ export class UpgradeScene extends Phaser.Scene {
    */
   selectUpgrade(upgradeId) {
     // 移除键盘监听
-    this.input.keyboard.removeAllListeners();
+    this.removeKeyListeners();
 
     // 通知游戏场景
     this.scene.get('GameScene').events.emit('upgrade-selected', upgradeId);

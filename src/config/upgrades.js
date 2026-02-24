@@ -83,14 +83,14 @@ export const UPGRADES = {
 
   [UPGRADE_TYPES.AMMO_CAPACITY]: {
     id: UPGRADE_TYPES.AMMO_CAPACITY,
-    name: '弹药容量提升',
-    description: '最大弹药 +20%',
+    name: '子弹速度提升',
+    description: '子弹飞行速度 +20%',
     type: 'stat',
     repeatable: true,
     maxLevel: 5,
     value: 0.2,
     apply: (player, level) => {
-      // 这个会在武器系统中处理
+      player.bulletSpeed *= 1.2;
     }
   },
 
@@ -182,6 +182,7 @@ export const UPGRADES = {
     maxLevel: 1,
     apply: (player, level) => {
       player.hasShield = true;
+      player.shieldActive = true;
     }
   },
 

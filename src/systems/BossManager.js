@@ -1,7 +1,7 @@
 // src/systems/BossManager.js
 
 import { GAME_CONFIG } from '../config/gameConfig.ts';
-import { Boss } from '../entities/Boss.js';
+import { createBoss } from '../entities/Boss.js';
 
 export class BossManager {
   constructor(scene, bossGroup) {
@@ -34,6 +34,13 @@ export class BossManager {
   }
 
   /**
+   * 根据 stage 计算 bossType (1~5 循环)
+   */
+  getBossType(stage) {
+    return ((stage - 1) % 5) + 1;
+  }
+
+  /**
    * 生成BOSS
    */
   spawnBoss() {
@@ -45,16 +52,15 @@ export class BossManager {
     this.inBossPhase = true;
     this.stageTimer = 0;
 
-    // 不再清除小怪，BOSS期间也保留小兵
-    // this.scene.events.emit('clear-all-enemies');
-
     // 显示BOSS警告
-    this.showBossWarning();
+    const bossType = this.getBossType(this.stage);
+    const stageConf = GAME_CONFIG.BOSS.STAGES[bossType - 1];
+    this.showBossWarning(stageConf.name);
 
     // 2秒后生成BOSS
     this.scene.time.delayedCall(2000, () => {
       const { width } = this.scene.cameras.main;
-      this.currentBoss = new Boss(this.scene, width / 2, -50, this.stage);
+      this.currentBoss = createBoss(this.scene, width / 2, -50, this.stage, bossType);
 
       // 将BOSS添加到组中
       if (this.bossGroup) {
@@ -64,7 +70,8 @@ export class BossManager {
       // 触发BOSS出现事件
       this.scene.events.emit('boss-spawned', {
         boss: this.currentBoss,
-        stage: this.stage
+        stage: this.stage,
+        name: stageConf.name
       });
     });
   }
@@ -72,29 +79,35 @@ export class BossManager {
   /**
    * 显示BOSS警告
    */
-  showBossWarning() {
+  showBossWarning(name) {
     const { width, height } = this.scene.cameras.main;
 
-    const warningText = this.scene.add.text(width / 2, height / 2, 'BOSS WARNING!', {
+    const warningText = this.scene.add.text(width / 2, height / 2 - 20, 'BOSS WARNING!', {
       fontSize: '64px',
       fill: '#ff0000',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
+    const nameText = this.scene.add.text(width / 2, height / 2 + 30, name || '', {
+      fontSize: '28px',
+      fill: '#ffaa00',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5);
+
     // 闪烁效果
     this.scene.tweens.add({
-      targets: warningText,
+      targets: [warningText, nameText],
       alpha: 0,
       duration: 300,
       yoyo: true,
       repeat: 3,
       onComplete: () => {
         warningText.destroy();
+        nameText.destroy();
       }
     });
-
-    // 播放警告音（如果有）
-    // this.scene.sound.play('boss-warning');
   }
 
   /**

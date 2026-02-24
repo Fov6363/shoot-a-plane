@@ -1,5 +1,7 @@
 // src/utils/assetGenerator.js
 
+import { GAME_CONFIG } from '../config/gameConfig.ts';
+
 /**
  * 生成临时的像素风格图形资源
  * 用于在没有美术资源时快速开发
@@ -302,75 +304,84 @@ export class AssetGenerator {
   }
 
   /**
-   * 创建BOSS飞船精灵 - 增强版
+   * 创建BOSS飞船精灵 - 参数化颜色版
+   * @param {Phaser.Scene} scene
+   * @param {number} bossType 1~5
+   * @param {number} mainColor 主色调
    */
-  static createBossSprite(scene) {
+  static createBossSprite(scene, bossType = 1, mainColor = 0xff00ff) {
     const graphics = scene.add.graphics();
-    const offsetX = 65; // 中心X偏移
-    const offsetY = 45; // 中心Y偏移
+    const offsetX = 65;
+    const offsetY = 45;
+
+    const dark = AssetGenerator.safeColorSub(mainColor, 0x440044);
+    const bright = AssetGenerator.safeColorAdd(mainColor, 0x224422);
+    const accent = AssetGenerator.safeColorAdd(mainColor, 0x446644);
 
     // 阴影层
     graphics.fillStyle(0x000000, 0.4);
     graphics.fillRect(offsetX - 28, offsetY - 23, 56, 48);
 
-    // 主机身 - 深紫色基底
-    graphics.fillStyle(0xaa00aa, 1);
+    // 主机身
+    graphics.fillStyle(dark, 1);
     graphics.fillRect(offsetX - 30, offsetY - 25, 60, 50);
 
     // 机身高光层
-    graphics.fillStyle(0xff00ff, 1);
+    graphics.fillStyle(mainColor, 1);
     graphics.fillRect(offsetX - 28, offsetY - 23, 56, 46);
-    graphics.fillStyle(0xff44ff, 1);
+    graphics.fillStyle(bright, 1);
     graphics.fillRect(offsetX - 24, offsetY - 20, 48, 40);
 
-    // 驾驶舱（中央凸起）- 多层结构
-    graphics.fillStyle(0xaa00aa, 1);
+    // 驾驶舱（中央凸起）
+    graphics.fillStyle(dark, 1);
     graphics.fillRect(offsetX - 15, offsetY - 38, 30, 18);
-    graphics.fillStyle(0xff00ff, 1);
+    graphics.fillStyle(mainColor, 1);
     graphics.fillRect(offsetX - 13, offsetY - 36, 26, 14);
-    graphics.fillStyle(0xff44ff, 1);
+    graphics.fillStyle(bright, 1);
     graphics.fillRect(offsetX - 11, offsetY - 34, 22, 10);
 
     // 装甲板线条
-    graphics.lineStyle(2, 0x660066, 1);
+    const strokeColor = AssetGenerator.safeColorSub(mainColor, 0x660066);
+    graphics.lineStyle(2, strokeColor, 1);
     graphics.strokeRect(offsetX - 30, offsetY - 25, 60, 50);
     graphics.strokeRect(offsetX - 15, offsetY - 38, 30, 18);
     graphics.lineStyle(0);
 
-    // 左侧机翼/引擎 - 更强壮的设计
-    graphics.fillStyle(0xaa00aa, 1);
+    // 左侧机翼/引擎
+    graphics.fillStyle(dark, 1);
     graphics.fillRect(offsetX - 58, offsetY - 12, 28, 24);
     graphics.fillTriangle(offsetX - 58, offsetY - 12, offsetX - 64, offsetY + 0, offsetX - 58, offsetY + 12);
-    graphics.fillStyle(0xff00ff, 1);
+    graphics.fillStyle(mainColor, 1);
     graphics.fillRect(offsetX - 56, offsetY - 10, 24, 20);
     // 左引擎发光核心
-    graphics.fillStyle(0xff0088, 1);
+    graphics.fillStyle(accent, 1);
     graphics.fillRect(offsetX - 52, offsetY - 6, 16, 12);
-    graphics.fillStyle(0xff66ff, 1);
+    graphics.fillStyle(bright, 1);
     graphics.fillRect(offsetX - 48, offsetY - 4, 12, 8);
 
     // 右侧机翼/引擎
-    graphics.fillStyle(0xaa00aa, 1);
+    graphics.fillStyle(dark, 1);
     graphics.fillRect(offsetX + 30, offsetY - 12, 28, 24);
     graphics.fillTriangle(offsetX + 58, offsetY - 12, offsetX + 64, offsetY + 0, offsetX + 58, offsetY + 12);
-    graphics.fillStyle(0xff00ff, 1);
+    graphics.fillStyle(mainColor, 1);
     graphics.fillRect(offsetX + 32, offsetY - 10, 24, 20);
     // 右引擎发光核心
-    graphics.fillStyle(0xff0088, 1);
+    graphics.fillStyle(accent, 1);
     graphics.fillRect(offsetX + 36, offsetY - 6, 16, 12);
-    graphics.fillStyle(0xff66ff, 1);
+    graphics.fillStyle(bright, 1);
     graphics.fillRect(offsetX + 36, offsetY - 4, 12, 8);
 
     // 机头（下方尖锐攻击锋）
-    graphics.fillStyle(0xff00ff, 1);
+    graphics.fillStyle(mainColor, 1);
     graphics.fillTriangle(offsetX + 0, offsetY + 44, offsetX - 24, offsetY + 25, offsetX + 24, offsetY + 25);
-    graphics.fillStyle(0xff44ff, 1);
+    graphics.fillStyle(bright, 1);
     graphics.fillTriangle(offsetX + 0, offsetY + 44, offsetX - 16, offsetY + 28, offsetX + 16, offsetY + 28);
 
-    // 驾驶舱窗口（深紫色带能量光）
-    graphics.fillStyle(0x220022, 1);
+    // 驾驶舱窗口
+    const cabinDark = AssetGenerator.safeColorSub(mainColor, 0xcc00cc);
+    graphics.fillStyle(cabinDark, 1);
     graphics.fillRect(offsetX - 12, offsetY - 32, 24, 12);
-    graphics.fillStyle(0xff00ff, 0.7);
+    graphics.fillStyle(mainColor, 0.7);
     graphics.fillRect(offsetX - 10, offsetY - 30, 8, 4);
     graphics.fillRect(offsetX + 2, offsetY - 28, 8, 4);
 
@@ -382,7 +393,7 @@ export class AssetGenerator {
     graphics.fillCircle(offsetX - 22, offsetY - 15, 3);
     graphics.fillCircle(offsetX + 22, offsetY - 15, 3);
 
-    // 重型武器挂点（橙红色）
+    // 重型武器挂点
     graphics.fillStyle(0xff4400, 1);
     graphics.fillCircle(offsetX - 22, offsetY + 10, 5);
     graphics.fillCircle(offsetX + 22, offsetY + 10, 5);
@@ -391,19 +402,20 @@ export class AssetGenerator {
     graphics.fillCircle(offsetX + 22, offsetY + 10, 3);
 
     // 能量核心（中央发光）
-    graphics.fillStyle(0xff00ff, 0.8);
+    graphics.fillStyle(mainColor, 0.8);
     graphics.fillCircle(offsetX + 0, offsetY + 0, 8);
     graphics.fillStyle(0xffffff, 0.9);
     graphics.fillCircle(offsetX + 0, offsetY + 0, 5);
-    graphics.fillStyle(0xff44ff, 1);
+    graphics.fillStyle(bright, 1);
     graphics.fillCircle(offsetX + 0, offsetY + 0, 3);
 
     // 装甲细节线条
-    graphics.lineStyle(1, 0xff44ff, 0.6);
+    graphics.lineStyle(1, bright, 0.6);
     graphics.strokeRect(offsetX - 26, offsetY - 22, 20, 40);
     graphics.strokeRect(offsetX + 6, offsetY - 22, 20, 40);
 
-    graphics.generateTexture('boss', 130, 90);
+    const key = `boss-${bossType}`;
+    graphics.generateTexture(key, 130, 90);
     graphics.destroy();
   }
 
@@ -436,7 +448,13 @@ export class AssetGenerator {
     this.createBulletSprite(scene, 'bullet', 0x00e5ff);
     this.createBulletSprite(scene, 'enemy-bullet', 0xff2ad4);
     this.createXPOrbSprite(scene);
-    this.createBossSprite(scene);
+
+    // 生成 5 种 BOSS 贴图
+    const stages = GAME_CONFIG.BOSS.STAGES;
+    for (let i = 0; i < stages.length; i++) {
+      this.createBossSprite(scene, i + 1, stages[i].color);
+    }
+
     this.createParticleSprite(scene);
   }
 }

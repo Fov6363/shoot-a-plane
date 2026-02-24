@@ -33,8 +33,8 @@ export class ExperienceSystem {
     // 显示经验值获取
     this.scene.events.emit('xp-gained', actualAmount);
 
-    // 检查升级
-    if (this.currentXP >= this.nextLevelXP) {
+    // 检查升级（循环处理，防止大量经验一次跳多级）
+    while (this.currentXP >= this.nextLevelXP) {
       this.levelUp();
     }
   }

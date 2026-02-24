@@ -29,11 +29,20 @@ export interface ExperienceConfig {
   BOSS_XP: number;
 }
 
+export interface BossStageConfig {
+  name: string;
+  color: number;
+  moveSpeed: number;
+  shootInterval: number;
+  bulletSpeed: number;
+}
+
 export interface BossConfig {
   STAGE_DURATION: number;
   BASE_HP: number;
   HP_PER_STAGE: number;
   BASE_SCORE: number;
+  STAGES: BossStageConfig[];
 }
 
 export interface DifficultyConfig {
