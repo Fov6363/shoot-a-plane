@@ -1312,7 +1312,7 @@ export class GameScene extends Phaser.Scene {
   // ===== 内联升级 UI =====
 
   /**
-   * 构建底部升级卡片容器
+   * 构建顶部升级卡片容器
    */
   createUpgradeCards(options) {
     const { width, height } = this.cameras.main;
@@ -1321,10 +1321,10 @@ export class GameScene extends Phaser.Scene {
     this.upgradeUIContainer = this.add.container(0, 0);
     this.upgradeUIContainer.setDepth(2000);
 
-    // 底部 22% 半透明背景
+    // 顶部 22% 半透明背景
     const bgH = Math.round(height * 0.22);
-    const bgY = height - bgH;
-    const bg = this.add.rectangle(width / 2, bgY + bgH / 2, width, bgH, 0x000000, 0.7);
+    const bgY = 0;
+    const bg = this.add.rectangle(width / 2, bgH / 2, width, bgH, 0x000000, 0.7);
     this.upgradeUIContainer.add(bg);
 
     // 卡片尺寸
@@ -1334,9 +1334,10 @@ export class GameScene extends Phaser.Scene {
     const cardH = Math.round(bgH - 20);
     const totalW = cardCount * cardW + (cardCount - 1) * spacing;
     const startX = (width - totalW) / 2 + cardW / 2;
-    const cardY = bgY + bgH / 2;
+    const cardY = bgH / 2;
 
     this._upgradeCards = [];
+    this._upgradeBgH = bgH;
 
     options.forEach((upgrade, index) => {
       const x = startX + (cardW + spacing) * index;
@@ -1347,11 +1348,11 @@ export class GameScene extends Phaser.Scene {
     // 默认高亮第一张
     this.highlightUpgradeCard(0);
 
-    // 创建倒计时圆环（在第一张卡片上）
+    // 创建倒计时圆环（在第一张卡片下方）
     this.createCountdownRing(this._upgradeCards[0]);
 
-    // 刷新按钮
-    this.createInlineRerollButton(bgY);
+    // 刷新按钮（卡片区域下方）
+    this.createInlineRerollButton(bgH);
 
     // 桌面端键盘快捷键
     this._upgradeKeyListeners = [];
@@ -1365,8 +1366,8 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
-    // 滑入动画（从底部弹出）
-    this.upgradeUIContainer.y = bgH;
+    // 滑入动画（从顶部滑下）
+    this.upgradeUIContainer.y = -bgH;
     this.tweens.add({
       targets: this.upgradeUIContainer,
       y: 0,
@@ -1465,7 +1466,7 @@ export class GameScene extends Phaser.Scene {
   createCountdownRing(card) {
     if (!card) return;
     const cx = card.container.x;
-    const cy = card.container.y - 50;
+    const cy = card.container.y + 50;
 
     this.upgradeCountdownGraphics = this.add.graphics();
     this.upgradeCountdownGraphics.setDepth(2001);
@@ -1485,7 +1486,7 @@ export class GameScene extends Phaser.Scene {
 
     const card = this._upgradeCards[this.upgradeDefaultIndex];
     const cx = card.container.x;
-    const cy = card.container.y - 50;
+    const cy = card.container.y + 50;
     const radius = 14;
 
     this.upgradeCountdownGraphics.clear();
@@ -1530,12 +1531,11 @@ export class GameScene extends Phaser.Scene {
       this._rerollKeyHandler = null;
     }
 
-    // 滑出动画
-    const { height } = this.cameras.main;
-    const bgH = Math.round(height * 0.22);
+    // 滑出动画（向上滑出）
+    const bgH = this._upgradeBgH || Math.round(this.cameras.main.height * 0.22);
     this.tweens.add({
       targets: this.upgradeUIContainer,
-      y: bgH + 20,
+      y: -(bgH + 20),
       duration: 200,
       ease: 'Power2',
       onComplete: () => {
@@ -1578,7 +1578,7 @@ export class GameScene extends Phaser.Scene {
   /**
    * 创建内联刷新按钮
    */
-  createInlineRerollButton(bgY) {
+  createInlineRerollButton(bgH) {
     const tokens = this.player.rerollTokens || 0;
     if (tokens <= 0) return;
 
@@ -1586,7 +1586,7 @@ export class GameScene extends Phaser.Scene {
     const btnW = 140;
     const btnH = 30;
     const btnX = width / 2;
-    const btnY = bgY - 20;
+    const btnY = bgH + 20;
 
     const btnBg = this.add.rectangle(btnX, btnY, btnW, btnH, 0x224422, 0.9);
     btnBg.setStrokeStyle(2, 0x44ff44);
