@@ -24,10 +24,8 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     const stageConf = GAME_CONFIG.BOSS.STAGES[bossType - 1];
     this.bossName = stageConf.name;
 
-    // 血量：基础 + 每阶段递增 + 循环轮次额外加成
-    this.maxHp = GAME_CONFIG.BOSS.BASE_HP
-      + GAME_CONFIG.BOSS.HP_PER_STAGE * (stage - 1)
-      + this.cycle * 200;
+    // 血量：指数增长 + 循环轮次额外加成
+    this.maxHp = Math.round(GAME_CONFIG.BOSS.BASE_HP * Math.pow(1.4, stage - 1)) + this.cycle * 300;
     this.hp = this.maxHp;
 
     this.scoreValue = GAME_CONFIG.BOSS.BASE_SCORE * stage;
@@ -35,7 +33,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     this.goldValue = GAME_CONFIG.GOLD.BOSS_BASE_GOLD + GAME_CONFIG.GOLD.BOSS_GOLD_PER_STAGE * stage;
 
     // 移动参数（循环轮次微调）
-    const cycleMult = 1 + this.cycle * 0.15;
+    const cycleMult = 1 + this.cycle * 0.25;
     this.moveSpeed = stageConf.moveSpeed * cycleMult;
     this.moveDirection = 1;
     this.moveRange = 200;
@@ -48,6 +46,9 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
 
     // 特殊能力计时器
     this.specialTimer = 0;
+
+    // 半血狂暴标记
+    this._enraged = false;
 
     this.setCollideWorldBounds(true);
 
@@ -153,9 +154,32 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
 
   preUpdate(time, delta) {
     super.preUpdate(time, delta);
+
+    // 通用半血狂暴
+    if (!this._enraged && this.hp / this.maxHp < 0.5) {
+      this._enraged = true;
+      this.onEnrage();
+    }
+
     this.updateMovement(delta);
     this.updateShooting(time, delta);
     this.updateSpecial(time, delta);
+  }
+
+  onEnrage() {
+    // 射击间隔减少 25%
+    this.shootInterval = Math.max(300, this.shootInterval * 0.75);
+    // 弹速增加 15%
+    this.bulletSpeed *= 1.15;
+    // 视觉提示
+    this.scene.tweens.add({
+      targets: this,
+      alpha: 0.4,
+      duration: 150,
+      yoyo: true,
+      repeat: 5,
+      onComplete: () => { if (this.active) this.setAlpha(1); }
+    });
   }
 
   updateMovement(delta) {
@@ -234,12 +258,11 @@ export class StormBoss extends Boss {
   constructor(scene, x, y, stage) {
     super(scene, x, y, stage, 2);
     this.ringAngle = 0; // 环形弹幕起始偏移
-    this.enraged = false;
   }
 
   shoot() {
     const baseCount = 10;
-    const count = this.enraged ? baseCount * 2 : baseCount;
+    const count = this._enraged ? baseCount * 2 : baseCount;
     const step = 360 / count;
 
     for (let i = 0; i < count; i++) {
@@ -249,19 +272,14 @@ export class StormBoss extends Boss {
     this.ringAngle += 15;
   }
 
+  onEnrage() {
+    // 基类的射击间隔和弹速加成
+    super.onEnrage();
+    // StormBoss 特色：环形弹幕加密（在 shoot 中通过 _enraged 判断）
+  }
+
   updateSpecial(time, delta) {
-    if (!this.enraged && this.hp / this.maxHp < 0.5) {
-      this.enraged = true;
-      // 视觉提示：闪烁
-      this.scene.tweens.add({
-        targets: this,
-        alpha: 0.4,
-        duration: 150,
-        yoyo: true,
-        repeat: 5,
-        onComplete: () => { if (this.active) this.setAlpha(1); }
-      });
-    }
+    // 半血狂暴由基类 preUpdate 处理，此处无需额外逻辑
   }
 }
 
@@ -413,7 +431,7 @@ export class DestroyerBoss extends Boss {
   constructor(scene, x, y, stage) {
     super(scene, x, y, stage, 5);
     this.patternIndex = 0;
-    this.enraged = false;
+    this._ultraEnraged = false;
     this.teleportTimer = 0;
     this.teleportInterval = 5000;
     this.ringAngle = 0;
@@ -472,9 +490,9 @@ export class DestroyerBoss extends Boss {
   }
 
   updateSpecial(time, delta) {
-    // 狂暴检测
-    if (!this.enraged && this.hp / this.maxHp < 0.3) {
-      this.enraged = true;
+    // 30%血量额外狂暴：移速+50%，射间再减半
+    if (!this._ultraEnraged && this.hp / this.maxHp < 0.3) {
+      this._ultraEnraged = true;
       this.shootInterval = Math.max(250, this.shootInterval / 2);
       this.moveSpeed *= 1.5;
 

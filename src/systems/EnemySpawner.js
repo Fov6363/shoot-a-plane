@@ -58,21 +58,21 @@ export class EnemySpawner {
    * 随时间更新难度
    */
   updateDifficulty() {
-    // 每20秒增加一次难度
-    const difficultyLevel = Math.floor(this.gameTime / 20);
+    // 每15秒增加一次难度
+    const difficultyLevel = Math.floor(this.gameTime / 15);
 
-    // 时间难度倍率：每20秒增加10%
-    this.timeDifficultyMultiplier = 1 + difficultyLevel * 0.1;
+    // 时间难度倍率：每15秒增加12%
+    this.timeDifficultyMultiplier = 1 + difficultyLevel * 0.12;
 
     // 综合难度 = 取时间和阶段的较大值
     this.difficultyMultiplier = Math.max(this.timeDifficultyMultiplier, this.stageDifficultyMultiplier);
 
-    // 生成速度：每20秒减少10%间隔（最多减少50%）
-    const spawnSpeedUp = Math.min(difficultyLevel * 0.1, 0.5);
+    // 生成速度：每15秒减少10%间隔（最多减少60%）
+    const spawnSpeedUp = Math.min(difficultyLevel * 0.1, 0.6);
     this.currentSpawnInterval = this.baseSpawnInterval * (1 - spawnSpeedUp);
 
-    // 确保最小间隔不低于200ms
-    this.currentSpawnInterval = Math.max(this.currentSpawnInterval, 200);
+    // 确保最小间隔不低于150ms
+    this.currentSpawnInterval = Math.max(this.currentSpawnInterval, 150);
   }
 
   /**
@@ -112,18 +112,32 @@ export class EnemySpawner {
     }
 
     // 应用难度倍率
-    // 全局小怪血量下调20%，并叠加难度倍率
-    enemy.maxHp = Math.max(1, Math.round(enemy.maxHp * this.difficultyMultiplier * 0.8));
+    enemy.maxHp = Math.max(1, Math.round(enemy.maxHp * this.difficultyMultiplier));
     enemy.hp = enemy.maxHp;
 
-    // 基础速度提升20%，然后随难度继续增加
-    enemy.baseSpeed *= 1.2 * (1 + Math.floor(this.gameTime / 30) * 0.05);
+    // 速度随时间增加，每30秒+8%
+    enemy.baseSpeed *= (1 + Math.floor(this.gameTime / 30) * 0.08);
     enemy.setVelocityY(enemy.baseSpeed);
 
     this.enemies.add(enemy);
 
     // 重要：添加到组后必须重新设置速度，因为组会重置速度为0
     enemy.setVelocityY(enemy.baseSpeed);
+
+    // 60秒后开始出精英，概率随时间递增，最高15%
+    if (this.gameTime > 60) {
+      const eliteChance = Math.min(0.15, (this.gameTime - 60) / 600);
+      if (Math.random() < eliteChance) {
+        enemy.maxHp = Math.round(enemy.maxHp * 2);
+        enemy.hp = enemy.maxHp;
+        enemy.isElite = true;
+        // 精英有额外金币和经验
+        enemy.goldValue = (enemy.goldValue || GAME_CONFIG.ENEMY_TYPES[type]?.gold || 1) * 3;
+        enemy.xpValue = (enemy.xpValue || GAME_CONFIG.ENEMY_TYPES[type]?.xp || 3) * 2;
+        // 视觉：设置黄色 tint
+        enemy.setTint(0xffdd00);
+      }
+    }
   }
 
   /**

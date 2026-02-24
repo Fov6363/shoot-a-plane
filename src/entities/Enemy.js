@@ -36,7 +36,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // 受伤闪烁
     this.setTint(0xff0000);
     this.scene.time.delayedCall(100, () => {
-      if (this.active) this.clearTint();
+      if (this.active) {
+        if (this.isElite) {
+          this.setTint(0xffdd00);
+        } else {
+          this.clearTint();
+        }
+      }
     });
 
     if (this.hp <= 0) {
