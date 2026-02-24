@@ -9,7 +9,7 @@ echo "检查线上: $SITE_URL"
 echo ""
 
 # 抓取线上 HTML 中的 commit meta 标签
-REMOTE_HASH=$(curl -sL "$SITE_URL" | grep -oP 'meta name="commit" content="\K[^"]+')
+REMOTE_HASH=$(curl -sL "$SITE_URL" | sed -n 's/.*<meta name="commit" content="\([^"]*\)".*/\1/p')
 
 if [ -z "$REMOTE_HASH" ]; then
   echo "❌ 线上未找到 commit 标记（可能还没部署带标记的版本）"
